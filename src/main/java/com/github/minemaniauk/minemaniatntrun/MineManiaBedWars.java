@@ -21,8 +21,13 @@ package com.github.minemaniauk.minemaniatntrun;
 
 import com.github.cozyplugins.cozylibrary.CozyPlugin;
 import com.github.cozyplugins.cozylibrary.command.command.command.ProgrammableCommand;
+import com.github.cozyplugins.cozylibrary.configuration.SingleTypeConfigurationDirectory;
 import com.github.minemaniauk.api.MineManiaAPI;
+import com.github.minemaniauk.api.game.session.SessionManager;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
+import com.github.minemaniauk.minemaniatntrun.configuration.ArenaConfiguration;
+import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +42,9 @@ public final class MineManiaBedWars extends CozyPlugin {
 
     private static @NotNull MineManiaBedWars instance;
 
+    private @NotNull ArenaConfiguration arenaConfiguration;
+    private @NotNull SessionManager<BedWarsSession, BedWarsArena> sessionManager;
+
     @Override
     public boolean enableCommandDirectory() {
         return false;
@@ -47,6 +55,18 @@ public final class MineManiaBedWars extends CozyPlugin {
 
         // Initialize this instance.
         MineManiaBedWars.instance = this;
+
+        // Add configuration.
+        this.arenaConfiguration = new ArenaConfiguration();
+        this.arenaConfiguration.reload();
+
+        // Add arenas from configuration to api.
+        this.arenaConfiguration.getAllTypes().forEach(
+                arena -> MineManiaBedWars.getAPI().getGameManager().registerArena(arena)
+        );
+
+        // Add session manager.
+        this.sessionManager = new SessionManager<>();
 
         // Add commands.
         this.addCommand(new ProgrammableCommand("bedwars")
@@ -63,8 +83,23 @@ public final class MineManiaBedWars extends CozyPlugin {
     public void onDisable() {
         super.onDisable();
 
+        // Loop though all sessions and stop them.
+        this.sessionManager.stopAllSessionComponents();
+
+        // Remove game identifier.
+        this.getArenaConfiguration().resetGameIdentifiers();
+
         // Unregister the local arenas.
         MineManiaBedWars.getAPI().getGameManager().unregisterLocalArenas();
+    }
+
+    /**
+     * Used to get the instance of the local arena configuration.
+     *
+     * @return The local arena configuration.
+     */
+    public @NotNull ArenaConfiguration getArenaConfiguration() {
+        return this.arenaConfiguration;
     }
 
     /**
