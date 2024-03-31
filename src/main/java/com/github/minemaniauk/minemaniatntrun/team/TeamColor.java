@@ -18,7 +18,6 @@
 
 package com.github.minemaniauk.minemaniatntrun.team;
 
-import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -40,7 +39,7 @@ public enum TeamColor {
     /**
      * Used to create a new team color.
      *
-     * @param title The title of the team color.
+     * @param title     The title of the team color.
      * @param colorCode The color code to use.
      */
     TeamColor(@NotNull String title, @NotNull String colorCode) {

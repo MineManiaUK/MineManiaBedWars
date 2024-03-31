@@ -21,7 +21,6 @@ package com.github.minemaniauk.minemaniatntrun;
 
 import com.github.cozyplugins.cozylibrary.CozyPlugin;
 import com.github.cozyplugins.cozylibrary.command.command.command.ProgrammableCommand;
-import com.github.cozyplugins.cozylibrary.configuration.SingleTypeConfigurationDirectory;
 import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.game.session.SessionManager;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;

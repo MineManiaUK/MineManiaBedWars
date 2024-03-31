@@ -20,11 +20,8 @@
 package com.github.minemaniauk.minemaniatntrun.configuration;
 
 import com.github.cozyplugins.cozylibrary.configuration.SingleTypeConfigurationDirectory;
-import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
-import com.github.minemaniauk.minemaniatntrun.MineManiaTNTRun;
-import com.github.minemaniauk.minemaniatntrun.arena.TNTArena;
-import org.bukkit.block.data.type.Bed;
+import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

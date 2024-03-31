@@ -23,18 +23,22 @@ import com.github.cozyplugins.cozylibrary.indicator.Savable;
 import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.game.GameType;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
+import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import com.github.smuddgge.squishyconfiguration.indicator.ConfigurationConvertable;
 import com.github.smuddgge.squishyconfiguration.interfaces.ConfigurationSection;
 import com.github.smuddgge.squishyconfiguration.memory.MemoryConfigurationSection;
+import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedHashMap;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents a bed wars arena.
  */
 public class BedWarsArena extends Arena implements ConfigurationConvertable<BedWarsArena>, Savable, LocationConvertable {
+
+    private @NotNull List<@NotNull TeamLocation> teamLocationList;
 
     /**
      * Used to create a new instance of a bed wars arena.
@@ -43,6 +47,8 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
      */
     public BedWarsArena(@NotNull UUID identifier) {
         super(identifier, MineManiaBedWars.getAPI().getServerName(), GameType.BED_WARS);
+
+        this.teamLocationList = new ArrayList<>();
     }
 
     @Override
@@ -53,6 +59,44 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
     @Override
     public void deactivate() {
 
+    }
+
+    /**
+     * Used to get the instance of the list of team locations.
+     *
+     * @return The list of team location.
+     */
+    public @NotNull List<TeamLocation> getTeamLocationList() {
+        return this.teamLocationList;
+    }
+
+    /**
+     * Used to get a team location given the color of the team.
+     *
+     * @param color The color of the team to look for.
+     * @return The optional team location.
+     */
+    public @NotNull Optional<TeamLocation> getTeamLocation(@NotNull TeamColor color) {
+        for (TeamLocation location : this.teamLocationList) {
+            if (location.getColor().equals(color)) return Optional.of(location);
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Used to get a team location that a location is within.
+     *
+     * @param location The location within a team location.
+     * @return The team location the location is within.
+     * If the location is not in a team location, it will return empty.
+     */
+    public @NotNull Optional<TeamLocation> getTeamLocation(@NotNull Location location) {
+        for (TeamLocation teamLocation : this.teamLocationList) {
+            if (teamLocation.getRegion().contains(location)) return Optional.of(teamLocation);
+        }
+
+        return Optional.empty();
     }
 
     @Override
