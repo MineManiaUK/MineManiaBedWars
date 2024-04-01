@@ -18,20 +18,30 @@
 
 package com.github.minemaniauk.minemaniatntrun.session;
 
+import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.game.session.Session;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArenaFactory;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
+import net.royawesome.jlibnoise.module.combiner.Min;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
  * Represents a bed wars session.
  */
 public class BedWarsSession extends Session<BedWarsArena> {
+
+    private final @NotNull GameRoomRecord record;
+    private @NotNull BedWarsStatus status;
 
     /**
      * Used to create a new bed wars session.
@@ -40,15 +50,52 @@ public class BedWarsSession extends Session<BedWarsArena> {
      */
     public BedWarsSession(@NotNull UUID arenaIdentifier) {
         super(arenaIdentifier, new BedWarsArenaFactory());
+
+        this.record = this.getArena().getGameRoom().orElse(null);
+        this.status = BedWarsStatus.SELECTING_TEAMS;
+
+        if (this.record == null) {
+            throw new RuntimeException("Game room record is null.");
+        }
     }
 
     /**
      * Called when a block break event is triggered within the arena.
-     * 
+     *
      * @param event The instance of the event.
      * @param teamLocation The instance of the team location.
      *                     This will be null if it wasn't in a team location.
      */
     public void onBlockBreak(@NotNull BlockBreakEvent event, @Nullable TeamLocation teamLocation) {
+    }
+
+    /**
+     * Used to get the list of online players.
+     * The players in the game room that are online.
+     *
+     * @return The list of online players.
+     */
+    public @NotNull List<Player> getOnlinePlayers() {
+
+        // Create the instance of the list.
+        List<Player> playerList = new ArrayList<>();
+
+        // Add the online players.
+        this.record.getPlayers().forEach(
+                user -> MineManiaBedWars.getInstance()
+                        .getOnlinePlayer(user.getUniqueId())
+                        .ifPresent(playerList::add)
+        );
+
+        return playerList;
+    }
+
+    public @NotNull BedWarsStatus getStatus() {
+        return this.status;
+    }
+
+    public @NotNull BedWarsSession setStatus(@NotNull BedWarsStatus status) {
+        this.status = status;
+        return this;
     }
 }
