@@ -20,6 +20,7 @@ package com.github.minemaniauk.minemaniatntrun.arena;
 
 import com.github.cozyplugins.cozylibrary.indicator.LocationConvertable;
 import com.github.cozyplugins.cozylibrary.indicator.Savable;
+import com.github.cozyplugins.cozylibrary.location.Region3D;
 import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.game.GameType;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
@@ -30,6 +31,7 @@ import com.github.smuddgge.squishyconfiguration.interfaces.ConfigurationSection;
 import com.github.smuddgge.squishyconfiguration.memory.MemoryConfigurationSection;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -38,7 +40,11 @@ import java.util.*;
  */
 public class BedWarsArena extends Arena implements ConfigurationConvertable<BedWarsArena>, Savable, LocationConvertable {
 
-    private @NotNull List<@NotNull TeamLocation> teamLocationList;
+    private final @NotNull List<@NotNull TeamLocation> teamLocationList;
+    private @Nullable Region3D region;
+    private @Nullable Location spawnPoint;
+    private @Nullable Location schematicLocation;
+    private @Nullable String schematic;
 
     /**
      * Used to create a new instance of a bed wars arena.
@@ -99,15 +105,88 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
         return Optional.empty();
     }
 
+    public @NotNull Optional<Region3D> getRegion() {
+        return Optional.ofNullable(this.region);
+    }
+
+    public @NotNull Optional<Location> getSpawnPoint() {
+        return Optional.ofNullable(this.spawnPoint);
+    }
+
+    public @NotNull Optional<Location> getSchematicLocation() {
+        return Optional.ofNullable(this.schematicLocation);
+    }
+
+    public @NotNull Optional<String> getSchematic() {
+        return Optional.ofNullable(this.schematic);
+    }
+
+    public @NotNull BedWarsArena addTeamLocation(@NotNull TeamLocation location) {
+        this.teamLocationList.add(location);
+        return this;
+    }
+
+    public @NotNull BedWarsArena removeTeamLocation(@NotNull TeamColor color) {
+        this.teamLocationList.removeIf(teamLocation -> teamLocation.getColor().equals(color));
+        return this;
+    }
+
+    public @NotNull BedWarsArena setRegion(@NotNull Region3D region) {
+        this.region = region;
+        return this;
+    }
+
+    public @NotNull BedWarsArena setSpawnPoint(@NotNull Location location) {
+        this.spawnPoint = location;
+        return this;
+    }
+
+    public @NotNull BedWarsArena setSchematicLocation(@NotNull Location location) {
+        this.schematicLocation = location;
+        return this;
+    }
+
+    public @NotNull BedWarsArena setSchematic(@NotNull String schematic) {
+        this.schematic = schematic;
+        return this;
+    }
+
     @Override
     public @NotNull ConfigurationSection convert() {
         ConfigurationSection section = new MemoryConfigurationSection(new LinkedHashMap<>());
+
+        for (TeamLocation location : this.teamLocationList) {
+            section.set(
+                    "team_locations." + location.getColor().getName(),
+                    location.convert().getMap()
+            );
+        }
+
+        section.set("region", this.region == null ? null : this.region.convert().getMap());
+        section.set("spawn_point", this.spawnPoint == null ? null : this.convertLocation(this.spawnPoint));
+        section.set("schematic_location", this.schematicLocation == null ? null : this.convertLocation(this.schematicLocation));
+        section.set("schematic", this.schematic);
 
         return section;
     }
 
     @Override
     public @NotNull BedWarsArena convert(@NotNull ConfigurationSection section) {
+
+        for (String key : section.getSection("team_locations").getKeys()) {
+            this.teamLocationList.add(new TeamLocation(
+                    TeamColor.valueOf(key),
+                    section.getSection("team_locations." + key)
+            ));
+        }
+
+        if (section.getKeys().contains("region")) this.region = new Region3D(section.getSection("region"));
+        if (section.getKeys().contains("spawn_point"))
+            this.spawnPoint = this.convertLocation(section.getSection("spawn_point"));
+        if (section.getKeys().contains("schematic_location"))
+            this.schematicLocation = this.convertLocation(section.getSection("schematic_location"));
+        if (section.getKeys().contains("schematic")) this.schematic = section.getString("schematic");
+
         return this;
     }
 

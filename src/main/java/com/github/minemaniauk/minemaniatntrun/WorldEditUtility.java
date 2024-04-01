@@ -47,6 +47,12 @@ public final class WorldEditUtility {
         return session.getSelection();
     }
 
+    public static void clearSelection(@NotNull PlayerUser user) {
+        Player actor = BukkitAdapter.adapt(user.getPlayer());
+        LocalSession session = WorldEdit.getInstance().getSessionManager().get(actor);
+        session.getRegionSelector(session.getSelection().getWorld()).clear();
+    }
+
     /**
      * Used to get a user's selection as a region 3d.
      *

@@ -65,7 +65,7 @@ public class TeamLocation implements ConfigurationConvertable<TeamLocation>, Loc
      * Used to create a new team location from a
      * configuration section.
      *
-     * @param color The color of the team.
+     * @param color   The color of the team.
      * @param section The instance of the configuration section.
      */
     public TeamLocation(@NotNull TeamColor color,
@@ -201,5 +201,10 @@ public class TeamLocation implements ConfigurationConvertable<TeamLocation>, Loc
         }
 
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "{color: " + this.getColor().getName() + ", " + this.convert().getMap() + "}";
     }
 }

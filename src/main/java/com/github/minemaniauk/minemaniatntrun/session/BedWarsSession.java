@@ -21,7 +21,10 @@ package com.github.minemaniauk.minemaniatntrun.session;
 import com.github.minemaniauk.api.game.session.Session;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArenaFactory;
+import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -37,5 +40,15 @@ public class BedWarsSession extends Session<BedWarsArena> {
      */
     public BedWarsSession(@NotNull UUID arenaIdentifier) {
         super(arenaIdentifier, new BedWarsArenaFactory());
+    }
+
+    /**
+     * Called when a block break event is triggered within the arena.
+     * 
+     * @param event The instance of the event.
+     * @param teamLocation The instance of the team location.
+     *                     This will be null if it wasn't in a team location.
+     */
+    public void onBlockBreak(@NotNull BlockBreakEvent event, @Nullable TeamLocation teamLocation) {
     }
 }
