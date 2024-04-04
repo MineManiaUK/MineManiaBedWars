@@ -19,7 +19,12 @@
 package com.github.minemaniauk.minemaniatntrun.team;
 
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Represents a team player.
@@ -28,18 +33,18 @@ import org.jetbrains.annotations.NotNull;
 public class TeamPlayer {
 
     private final @NotNull Team teamPointer;
-    private final @NotNull PlayerUser user;
+    private final @NotNull UUID playerUuid;
     private final @NotNull ArmorType armourType;
 
     /**
      * Used to create a new team player.
      *
      * @param team The instance of the team the player is in.
-     * @param user The instance of the user.
+     * @param playerUuid The player's uuid.
      */
-    public TeamPlayer(@NotNull Team team, @NotNull PlayerUser user) {
+    public TeamPlayer(@NotNull Team team, @NotNull UUID playerUuid) {
         this.teamPointer = team;
-        this.user = user;
+        this.playerUuid = playerUuid;
         this.armourType = ArmorType.NONE;
     }
 
@@ -58,8 +63,26 @@ public class TeamPlayer {
      *
      * @return The instance of the player user.
      */
-    public @NotNull PlayerUser getUser() {
-        return this.user;
+    public @NotNull UUID getPlayerUuid() {
+        return this.playerUuid;
+    }
+
+    /**
+     * Used to get the player if they are online.
+     * Otherwise, it will return empty.
+     *
+     * @return The instance of the player.
+     */
+    public @NotNull Optional<Player> getPlayer() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getUniqueId().equals(this.playerUuid)) return Optional.of(player);
+        }
+        return Optional.empty();
+    }
+
+    public @NotNull String getName() {
+        final String name = Bukkit.getOfflinePlayer(this.playerUuid).getName();
+        return name == null ? "null" : name;
     }
 
     /**

@@ -91,7 +91,7 @@ public class ArenaSetSchematicCommand implements CondensedCommand {
         MineManiaBedWars.getInstance().getArenaConfiguration().reloadRegisteredArenas();
 
         // Send a confirmation message.
-        user.sendMessage("&a&l> &aThe schematic of &f" + arena.getIdentifier() + " &ais now set to &f" + location);
+        user.sendMessage("&a&l> &aThe schematic of &f" + arena.getIdentifier() + " &ais now set to &f" + arena.getSchematic());
         return new CommandStatus();
     }
 

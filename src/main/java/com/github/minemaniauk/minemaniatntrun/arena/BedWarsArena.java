@@ -20,16 +20,24 @@ package com.github.minemaniauk.minemaniatntrun.arena;
 
 import com.github.cozyplugins.cozylibrary.indicator.LocationConvertable;
 import com.github.cozyplugins.cozylibrary.indicator.Savable;
+import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.location.Region3D;
+import com.github.minemaniauk.api.MineManiaLocation;
 import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.game.GameType;
+import com.github.minemaniauk.api.user.MineManiaUser;
+import com.github.minemaniauk.bukkitapi.BukkitLocationConverter;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.WorldEditUtility;
+import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import com.github.smuddgge.squishyconfiguration.indicator.ConfigurationConvertable;
 import com.github.smuddgge.squishyconfiguration.interfaces.ConfigurationSection;
 import com.github.smuddgge.squishyconfiguration.memory.MemoryConfigurationSection;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,12 +67,53 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
 
     @Override
     public void activate() {
+        try {
+            this.save();
 
+            // Check if the game room identifier has been provided.
+            if (this.getGameRoom().isEmpty()) {
+                MineManiaBedWars.getInstance().getLogger().warning("Couldn't not find game room identifier {" + this.getGameRoomIdentifier() + "} for " + this.getIdentifier());
+                return;
+            }
+
+            MineManiaBedWars.getInstance()
+                    .getSessionManager()
+                    .registerSession(new BedWarsSession(this.getIdentifier()));
+
+            // Check if the schematic has been provided.
+            if (this.schematic == null || !WorldEditUtility.getSchematicList().contains(this.getSchematic())) {
+                MineManiaBedWars.getInstance().getLogger().warning("Couldn't not find schematic {" + this.schematic + "} for " + this.getIdentifier());
+                return;
+            }
+
+            // Paste the schematic.
+            Clipboard clipboard = WorldEditUtility.getSchematic(this.getSchematic().orElseThrow());
+            WorldEditUtility.pasteClipboard(this.getRegion().orElseThrow().getMinPoint(), clipboard);
+
+            // Get spawn point as a mine mania location.
+            MineManiaLocation location = new BukkitLocationConverter()
+                    .getMineManiaLocation(this.getSpawnPoint().orElseThrow());
+
+            // Teleport the players.
+            for (MineManiaUser user : this.getGameRoom().get().getPlayers()) {
+                user.getActions().sendMessage("&7&l> &fGame started! &7Teleporting you to the game arena.");
+                user.getActions().teleport(location);
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
     }
 
     @Override
     public void deactivate() {
-
+        this.setGameRoomIdentifier(null);
+        this.save();
+        MineManiaBedWars.getInstance().getSessionManager()
+                .getSession(this.getIdentifier())
+                .ifPresent(session -> {
+                    session.stopComponents();
+                    MineManiaBedWars.getInstance().getSessionManager().unregisterSession(session);
+                });
     }
 
     /**
@@ -148,12 +197,38 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
 
     public @NotNull BedWarsArena setSchematic(@NotNull String schematic) {
         this.schematic = schematic;
+        if (this.schematic.contains("45")) {
+            this.setMapName("Construction Site");
+            this.setDisplayItemSection(new CozyItem()
+                    .setMaterial(Material.WOODEN_AXE)
+                    .setName("&6&lConstruction Site")
+                    .setLore("&7",
+                            "&fMin Players &a" + this.getMinPlayers(),
+                            "&fMax Players &a" + this.getMaxPlayers(),
+                            "&fTeams &a8",
+                            "&7",
+                            "&fMap Name &eConstruction Site",
+                            "&7",
+                            "&f&l" + this.getGameType().getTitle()
+                    )
+                    .convert()
+            );
+        }
         return this;
     }
 
     @Override
     public @NotNull ConfigurationSection convert() {
         ConfigurationSection section = new MemoryConfigurationSection(new LinkedHashMap<>());
+
+        section.set("server_name", this.getServerName());
+        section.set("game_type", this.getGameType().name());
+        if (this.getGameRoomIdentifier().isPresent())
+            section.set("game_room_identifier", this.getGameRoomIdentifier().get().toString());
+        section.set("min_players", this.getMinPlayers());
+        section.set("max_players", this.getMaxPlayers());
+        section.set("display_item", this.getDisplayItemSection() == null ? null : this.getDisplayItemSection().getMap());
+        section.set("map_name", this.getMapName());
 
         for (TeamLocation location : this.teamLocationList) {
             section.set(
@@ -173,9 +248,16 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
     @Override
     public @NotNull BedWarsArena convert(@NotNull ConfigurationSection section) {
 
+        if (section.getKeys().contains("game_room_identifier"))
+            this.setGameRoomIdentifier(UUID.fromString(section.getString("game_room_identifier")));
+        this.setMinPlayers(section.getInteger("min_players"));
+        this.setMaxPlayers(section.getInteger("max_players"));
+        if (section.getKeys().contains("display_item")) this.setDisplayItemSection(section.getSection("display_item"));
+        if (section.getKeys().contains("map_name")) this.setMapName(section.getString("map_name"));
+
         for (String key : section.getSection("team_locations").getKeys()) {
             this.teamLocationList.add(new TeamLocation(
-                    TeamColor.valueOf(key),
+                    TeamColor.valueOf(key.toUpperCase()),
                     section.getSection("team_locations." + key)
             ));
         }

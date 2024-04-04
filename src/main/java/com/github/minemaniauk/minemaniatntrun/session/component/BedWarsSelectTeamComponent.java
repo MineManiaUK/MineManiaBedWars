@@ -21,6 +21,7 @@ package com.github.minemaniauk.minemaniatntrun.session.component;
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
 import com.github.minemaniauk.api.game.session.SessionComponent;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
+import com.github.minemaniauk.minemaniatntrun.inventory.SelectTeamInventory;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsStatus;
 import org.bukkit.entity.Player;
@@ -60,8 +61,9 @@ public class BedWarsSelectTeamComponent extends TaskContainer implements Session
 
             for (Player player : this.getSession().getOnlinePlayers()) {
                 if (player.getOpenInventory().getTopInventory().getType().equals(InventoryType.CHEST)) continue;
+                if (this.getSession().getTeam(player.getUniqueId()).isPresent()) continue;
 
-                // TODO open select team inventory.
+                new SelectTeamInventory(this.getSession()).open(player);
             }
 
         }, 20);

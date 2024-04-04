@@ -18,23 +18,25 @@
 
 package com.github.minemaniauk.minemaniatntrun.team;
 
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents the available team colors.
  */
 public enum TeamColor {
-    RED("Red", "&c"),
-    ORANGE("Orange", "&6"),
-    YELLOW("Yellow", "&e"),
-    GREEN("Green", "&a"),
-    BLUE("Blue", "&b"),
-    PINK("Pink", "&d"),
-    WHITE("White", "&f"),
-    GRAY("Gray", "&7");
+    RED("Red", "&c", Material.RED_DYE),
+    ORANGE("Orange", "&6", Material.ORANGE_DYE),
+    YELLOW("Yellow", "&e", Material.YELLOW_DYE),
+    GREEN("Green", "&a", Material.LIME_DYE),
+    BLUE("Blue", "&b", Material.LIGHT_BLUE_DYE),
+    PINK("Pink", "&d", Material.PINK_DYE),
+    WHITE("White", "&f", Material.WHITE_DYE),
+    GRAY("Gray", "&7", Material.GRAY_DYE);
 
     private final @NotNull String title;
     private final @NotNull String colorCode;
+    private final @NotNull Material material;
 
     /**
      * Used to create a new team color.
@@ -42,9 +44,10 @@ public enum TeamColor {
      * @param title     The title of the team color.
      * @param colorCode The color code to use.
      */
-    TeamColor(@NotNull String title, @NotNull String colorCode) {
+    TeamColor(@NotNull String title, @NotNull String colorCode, @NotNull Material material) {
         this.title = title;
         this.colorCode = colorCode;
+        this.material = material;
     }
 
     public @NotNull String getTitle() {
@@ -57,5 +60,9 @@ public enum TeamColor {
 
     public @NotNull String getColorCode() {
         return this.colorCode;
+    }
+
+    public @NotNull Material getMaterial() {
+        return this.material;
     }
 }

@@ -32,6 +32,7 @@ import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -82,6 +83,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
                         .setDescription("Contains the arena commands")
                         .setSyntax("/bedwars arena")
                         .addSubCommand(new ArenaCreateCommand())
+                        .addSubCommand(new ArenaSetSchematicCommand())
                         .addSubCommand(new ArenaSetSchematicLocationCommand())
                         .addSubCommand(new ArenaSetSpawnPointCommand())
                         .addSubCommand(new ProgrammableCommand("team")
@@ -168,6 +170,10 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         }
 
         return Optional.empty();
+    }
+
+    public @NotNull SessionManager<BedWarsSession, BedWarsArena> getSessionManager() {
+        return this.sessionManager;
     }
 
     /**
