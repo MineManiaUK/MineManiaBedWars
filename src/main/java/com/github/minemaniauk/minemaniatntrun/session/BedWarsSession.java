@@ -18,17 +18,28 @@
 
 package com.github.minemaniauk.minemaniatntrun.session;
 
+import com.github.cozyplugins.cozylibrary.MessageManager;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.game.session.Session;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArenaFactory;
+import com.github.minemaniauk.minemaniatntrun.generator.Generator;
+import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsBlockInteractionsComponent;
+import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsScoreboardComponent;
+import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsSelectTeamComponent;
+import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsOutOfBoundsComponent;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
-import net.royawesome.jlibnoise.module.combiner.Min;
+import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
+import org.bukkit.GameMode;
+import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,6 +53,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
     private final @NotNull GameRoomRecord record;
     private @NotNull BedWarsStatus status;
     private @NotNull List<@NotNull Team> teamList;
+    private @NotNull List<@NotNull Generator> generatorList;
 
     /**
      * Used to create a new bed wars session.
@@ -62,21 +74,127 @@ public class BedWarsSession extends Session<BedWarsArena> {
         this.record = optionalRecord.get();
         this.status = BedWarsStatus.SELECTING_TEAMS;
         this.teamList = new ArrayList<>();
+        this.generatorList = new ArrayList<>();
 
         // Populate the team list.
         this.getArena().getTeamLocationList().forEach(
                 location -> this.teamList.add(new Team(location))
         );
+
+        this.registerComponent(new BedWarsScoreboardComponent(this));
+        this.registerComponent(new BedWarsSelectTeamComponent(this));
+        this.registerComponent(new BedWarsOutOfBoundsComponent(this));
+        this.registerComponent(new BedWarsBlockInteractionsComponent(this));
+
+        this.getComponent(BedWarsScoreboardComponent.class).start();
+        this.getComponent(BedWarsSelectTeamComponent.class).start();
+        this.getComponent(BedWarsOutOfBoundsComponent.class).start();
     }
 
     /**
      * Called when a block break event is triggered within the arena.
      *
-     * @param event The instance of the event.
+     * @param event        The instance of the event.
      * @param teamLocation The instance of the team location.
      *                     This will be null if it wasn't in a team location.
      */
     public void onBlockBreak(@NotNull BlockBreakEvent event, @Nullable TeamLocation teamLocation) {
+        this.getComponent(BedWarsBlockInteractionsComponent.class).onBlockBreak(event, teamLocation);
+    }
+
+    /**
+     * Called when a block place event is triggered within the arena.
+     *
+     * @param event        The instance of the event.
+     * @param teamLocation The instance of the team location.
+     *                     This will be null if it wasn't in a team location.
+     */
+    public void onBlockPlace(@NotNull BlockPlaceEvent event, @Nullable TeamLocation teamLocation) {
+        this.getComponent(BedWarsBlockInteractionsComponent.class).onBlockPlace(event, teamLocation);
+    }
+
+    /**
+     * Called when the game is started.
+     */
+    public void onStartGame() {
+
+        // Set the status.
+        this.setStatus(BedWarsStatus.GAME);
+
+        // Ensure the teams are made.
+        this.ensureTeams();
+
+        // Setup generators and start the generating.
+        this.getArena().getGeneratorLocationList().forEach(
+                location -> this.generatorList.add(new Generator(location).start())
+        );
+
+        // Teleport players to the correct area.
+        this.teleportTeams();
+        this.getOnlinePlayers().forEach(player -> {
+            player.setGameMode(GameMode.SURVIVAL);
+            player.getInventory().clear();
+        });
+
+        // Spawn the shop villagers.
+        this.spawnShops();
+    }
+
+    /**
+     * Used to ensure that all players are in a team.
+     *
+     * @return This instance.
+     */
+    public @NotNull BedWarsSession ensureTeams() {
+
+        final Iterator<Team> unbalancedTeams = this.getUnbalancedTeams().iterator();
+
+        // Loop though the players that are not in a team.
+        for (UUID playerUuid : this.getPlayersNotInATeam()) {
+
+            // Check if all teams have been balanced.
+            if (!unbalancedTeams.hasNext()) {
+
+                // Add the player to a random team.
+                final Team team = this.teamList.get(0);
+                team.addPlayer(playerUuid);
+
+                // When called again the unbalanced teams
+                // list will be recalculated.
+                this.ensureTeams();
+                return this;
+            }
+
+            // Add the player to the next unbalanced team.
+            unbalancedTeams.next().addPlayer(playerUuid);
+        }
+
+        return this;
+    }
+
+    public @NotNull BedWarsSession teleportTeams() {
+        for (Team team : this.teamList) {
+            team.teleportPlayers();
+        }
+        return this;
+    }
+
+    public @NotNull BedWarsSession spawnShops() {
+        for (Team team : this.getTeamList()) {
+            assert team.getLocation().getShopLocation() != null;
+
+            final World world = team.getLocation().getShopLocation().getWorld();
+            assert world != null;
+
+            Villager shopVillager = (Villager) world.spawnEntity(team.getLocation().getShopLocation(), EntityType.VILLAGER);
+            shopVillager.setCustomNameVisible(true);
+            shopVillager.setCustomName(MessageManager.parse("&6&lShop"));
+            shopVillager.setGravity(false);
+            shopVillager.setInvulnerable(true);
+            shopVillager.setPersistent(true);
+            shopVillager.setAI(false);
+        }
+        return this;
     }
 
     /**
@@ -109,12 +227,61 @@ public class BedWarsSession extends Session<BedWarsArena> {
         return playerList;
     }
 
+    /**
+     * Used to get the list of player uuid's
+     * where the player is not in a team.
+     *
+     * @return The list of player uuid's.
+     */
+    public @NotNull List<UUID> getPlayersNotInATeam() {
+        List<UUID> list = new ArrayList<>();
+        for (UUID playerUuid : this.getPlayerUuids()) {
+            if (this.getTeam(playerUuid).isEmpty()) list.add(playerUuid);
+        }
+        return list;
+    }
+
     public @NotNull BedWarsStatus getStatus() {
         return this.status;
     }
 
     public @NotNull List<Team> getTeamList() {
         return this.teamList;
+    }
+
+    /**
+     * Used to get the number of players
+     * in the biggest team.
+     *
+     * @return The number of players in the biggest team.
+     */
+    public int getAmountOfPlayersInBiggestTeam() {
+        int currentAmount = 0;
+        for (Team team : this.getTeamList()) {
+            final int size = team.getPlayerList().size();
+            if (size > currentAmount) currentAmount = size;
+        }
+        return currentAmount;
+    }
+
+    /**
+     * Used to get the list of teams which have fewer
+     * players then the biggest team.
+     *
+     * @return The list of unbalanced teams.
+     */
+    public @NotNull List<Team> getUnbalancedTeams() {
+
+        // Get the number of players in the biggest team.
+        final int amountOfPlayersInBiggestTeam = this.getAmountOfPlayersInBiggestTeam();
+
+        List<Team> unbalancedTeamList = new ArrayList<>();
+        for (Team team : this.getTeamList()) {
+            if (team.getPlayerList().size() < amountOfPlayersInBiggestTeam) {
+                unbalancedTeamList.add(team);
+            }
+        }
+        return unbalancedTeamList;
     }
 
     public @NotNull Optional<Team> getTeam(@NotNull TeamColor color) {
@@ -129,6 +296,17 @@ public class BedWarsSession extends Session<BedWarsArena> {
             if (team.getPlayer(playerUuid).isPresent()) return Optional.of(team);
         }
         return Optional.empty();
+    }
+
+    /**
+     * Used to get a player as a team player.
+     *
+     * @param playerUuid The player's uuid.
+     * @return The optional team player.
+     */
+    public @NotNull Optional<TeamPlayer> getTeamPlayer(@NotNull UUID playerUuid) {
+        final Optional<Team> optionalTeam = this.getTeam(playerUuid);
+        return optionalTeam.flatMap(team -> team.getPlayer(playerUuid));
     }
 
     public @NotNull BedWarsSession setStatus(@NotNull BedWarsStatus status) {

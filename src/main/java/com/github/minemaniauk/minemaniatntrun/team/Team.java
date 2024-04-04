@@ -18,6 +18,7 @@
 
 package com.github.minemaniauk.minemaniatntrun.team;
 
+import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -112,6 +113,31 @@ public class Team {
         this.playerList.removeIf(
                 player -> player.getPlayerUuid().equals(playerUuid)
         );
+        return this;
+    }
+
+    /**
+     * Used to check if the team still has
+     * a bed in their base.
+     *
+     * @return True if the team has a bed.
+     */
+    public boolean hasBed() {
+        return this.getLocation().getRegion().contains(
+                this.getLocation().getColor().getBed()
+        );
+    }
+
+    /**
+     * Used to teleport all the players in this team
+     * to the team spawn point.
+     *
+     * @return This instance.
+     */
+    public @NotNull Team teleportPlayers() {
+        for (TeamPlayer player : this.getOnlinePlayerList()) {
+            player.getPlayer().orElseThrow().teleport(this.getLocation().getSpawnPoint());
+        }
         return this;
     }
 }

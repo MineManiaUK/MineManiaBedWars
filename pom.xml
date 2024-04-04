@@ -31,7 +31,7 @@
   <name>MineManiaBedWars</name>
 
   <properties>
-    <java.version>1.8</java.version>
+    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>com.github.MineManiaUK</groupId>
             <artifactId>MineManiaAPI-Bukkit</artifactId>
-            <version>2.2.0</version>
+            <version>4.0.0</version>
         </dependency>
 
         <!-- FAWE -->

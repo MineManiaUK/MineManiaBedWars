@@ -28,15 +28,22 @@ import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.command.*;
 import com.github.minemaniauk.minemaniatntrun.configuration.ArenaConfiguration;
+import com.github.minemaniauk.minemaniatntrun.inventory.ShopInventory;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
+import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.data.type.Bed;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -86,6 +93,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
                         .addSubCommand(new ArenaSetSchematicCommand())
                         .addSubCommand(new ArenaSetSchematicLocationCommand())
                         .addSubCommand(new ArenaSetSpawnPointCommand())
+                        .addSubCommand(new ArenaSetGeneratorCommand())
                         .addSubCommand(new ProgrammableCommand("team")
                                 .setDescription("Contains the team commands")
                                 .setSyntax("/bedwars arena team")
@@ -133,6 +141,51 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         final TeamLocation teamLocation = arena.getTeamLocation(location).orElse(null);
 
         session.onBlockBreak(event, teamLocation);
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+
+        final Location location = event.getBlock().getLocation();
+
+        // Check if it was in an arena.
+        final BedWarsArena arena = this.getArena(location).orElse(null);
+        if (arena == null) return;
+
+        // Check if the arena is in a session.
+        BedWarsSession session = this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
+        if (session == null) return;
+
+        // Check if it was in a team location.
+        final TeamLocation teamLocation = arena.getTeamLocation(location).orElse(null);
+
+        session.onBlockPlace(event, teamLocation);
+    }
+
+    @EventHandler
+    public void onEntityInteractEvent(PlayerInteractEntityEvent event) {
+
+        final Location location = event.getPlayer().getLocation();
+
+        // Check if it was in an arena.
+        final BedWarsArena arena = this.getArena(location).orElse(null);
+        if (arena == null) return;
+
+        // Check if the arena is in a session.
+        BedWarsSession session = this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
+        if (session == null) return;
+
+        // Get the instance of the team player that clicked.
+        final Optional<TeamPlayer> optionalTeamPlayer = session.getTeamPlayer(event.getPlayer().getUniqueId());
+        if (optionalTeamPlayer.isEmpty()) return;
+
+        final TeamPlayer teamPlayer = optionalTeamPlayer.get();
+
+        if (!(event.getRightClicked() instanceof Villager villager)) return;
+
+        if (villager.getName().contains("Shop")) {
+            new ShopInventory(teamPlayer).open(event.getPlayer());
+        }
     }
 
     /**

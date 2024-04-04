@@ -29,6 +29,7 @@ import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.BukkitLocationConverter;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
 import com.github.minemaniauk.minemaniatntrun.WorldEditUtility;
+import com.github.minemaniauk.minemaniatntrun.generator.GeneratorLocation;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
@@ -53,6 +54,7 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
     private @Nullable Location spawnPoint;
     private @Nullable Location schematicLocation;
     private @Nullable String schematic;
+    private @NotNull List<GeneratorLocation> generatorLocationList;
 
     /**
      * Used to create a new instance of a bed wars arena.
@@ -63,6 +65,7 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
         super(identifier, MineManiaBedWars.getAPI().getServerName(), GameType.BED_WARS);
 
         this.teamLocationList = new ArrayList<>();
+        this.generatorLocationList = new ArrayList<>();
     }
 
     @Override
@@ -81,14 +84,14 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
                     .registerSession(new BedWarsSession(this.getIdentifier()));
 
             // Check if the schematic has been provided.
-            if (this.schematic == null || !WorldEditUtility.getSchematicList().contains(this.getSchematic())) {
+            if (this.schematic == null) {
                 MineManiaBedWars.getInstance().getLogger().warning("Couldn't not find schematic {" + this.schematic + "} for " + this.getIdentifier());
                 return;
             }
 
             // Paste the schematic.
-            Clipboard clipboard = WorldEditUtility.getSchematic(this.getSchematic().orElseThrow());
-            WorldEditUtility.pasteClipboard(this.getRegion().orElseThrow().getMinPoint(), clipboard);
+            Clipboard clipboard = WorldEditUtility.getSchematic(this.schematic.replace(".schematic", ""));
+            WorldEditUtility.pasteClipboard(this.schematicLocation, clipboard);
 
             // Get spawn point as a mine mania location.
             MineManiaLocation location = new BukkitLocationConverter()
@@ -167,7 +170,13 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
     }
 
     public @NotNull Optional<String> getSchematic() {
-        return Optional.ofNullable(this.schematic);
+        if (this.schematic == null) return Optional.empty();
+        // if (this.schematic.contains(".schematic")) return Optional.of(this.schematic.replace(".schematic", ""));
+        return Optional.of(this.schematic);
+    }
+
+    public @NotNull List<GeneratorLocation> getGeneratorLocationList() {
+        return this.generatorLocationList;
     }
 
     public @NotNull BedWarsArena addTeamLocation(@NotNull TeamLocation location) {
@@ -217,6 +226,11 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
         return this;
     }
 
+    public @NotNull BedWarsArena addGeneratorLocation(@NotNull GeneratorLocation location) {
+        this.generatorLocationList.add(location);
+        return this;
+    }
+
     @Override
     public @NotNull ConfigurationSection convert() {
         ConfigurationSection section = new MemoryConfigurationSection(new LinkedHashMap<>());
@@ -241,6 +255,10 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
         section.set("spawn_point", this.spawnPoint == null ? null : this.convertLocation(this.spawnPoint));
         section.set("schematic_location", this.schematicLocation == null ? null : this.convertLocation(this.schematicLocation));
         section.set("schematic", this.schematic);
+
+        for (GeneratorLocation location : this.generatorLocationList) {
+            section.set("generators." + location.getIdentifier().toString(), location.convert().getMap());
+        }
 
         return section;
     }
@@ -268,6 +286,15 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
         if (section.getKeys().contains("schematic_location"))
             this.schematicLocation = this.convertLocation(section.getSection("schematic_location"));
         if (section.getKeys().contains("schematic")) this.schematic = section.getString("schematic");
+
+        for (String identifier : section.getSection("generators").getKeys()) {
+            this.generatorLocationList.add(
+                    new GeneratorLocation(
+                            UUID.fromString(identifier),
+                            section.getSection("generators." + identifier)
+                    )
+            );
+        }
 
         return this;
     }

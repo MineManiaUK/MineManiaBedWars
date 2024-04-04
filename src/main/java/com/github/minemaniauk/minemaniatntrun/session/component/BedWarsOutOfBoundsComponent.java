@@ -19,19 +19,19 @@
 package com.github.minemaniauk.minemaniatntrun.session.component;
 
 import com.github.cozyplugins.cozylibrary.location.Region3D;
-import com.github.cozyplugins.cozylibrary.scoreboard.Scoreboard;
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
-import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.api.game.session.SessionComponent;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsStatus;
+import com.github.minemaniauk.minemaniatntrun.team.Team;
+import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class BedWarsSpectatorComponent extends TaskContainer implements SessionComponent<BedWarsArena> {
+public class BedWarsOutOfBoundsComponent extends TaskContainer implements SessionComponent<BedWarsArena> {
 
     private static final @NotNull String OUT_OF_BOUNDS_IDENTIFIER = "OUT_OF_BOUNDS_IDENTIFIER";
     private static final @NotNull String SPECTATOR_IDENTIFIER = "SPECTATOR_IDENTIFIER";
@@ -43,7 +43,7 @@ public class BedWarsSpectatorComponent extends TaskContainer implements SessionC
      *
      * @param session The instance of the session.
      */
-    public BedWarsSpectatorComponent(@NotNull BedWarsSession session) {
+    public BedWarsOutOfBoundsComponent(@NotNull BedWarsSession session) {
         this.session = session;
     }
 
@@ -71,16 +71,30 @@ public class BedWarsSpectatorComponent extends TaskContainer implements SessionC
 
             for (Player player : this.getSession().getOnlinePlayers()) {
                 if (region.contains(player.getLocation())) continue;
+
+                // Check if it is the Y cord.
+                if (player.getLocation().getBlockY() <= region.getMinPoint().getBlockY()) {
+
+                    final TeamPlayer teamPlayer = this.getSession().getTeamPlayer(player.getUniqueId()).orElseThrow();
+
+                    if (teamPlayer.isDead()) {
+                        player.teleport(spawnPoint);
+                        return;
+                    }
+
+                    teamPlayer.kill();
+                }
+
                 player.teleport(spawnPoint);
             }
 
-        }, 20);
+        }, 4);
 
         this.runTaskLoop(SPECTATOR_IDENTIFIER, () -> {
 
             if (this.getSession().getStatus().equals(BedWarsStatus.SELECTING_TEAMS)) {
                 for (Player player : this.getSession().getOnlinePlayers()) {
-                    player.setGameMode(GameMode.SPECTATOR);
+                    player.setGameMode(GameMode.ADVENTURE);
                 }
             }
 

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.github.minemaniauk.minemaniatntrun.team;
+package com.github.minemaniauk.minemaniatntrun.team.player;
 
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import org.bukkit.entity.Player;

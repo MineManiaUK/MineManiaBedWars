@@ -16,13 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.github.minemaniauk.minemaniatntrun.team;
+package com.github.minemaniauk.minemaniatntrun.team.player;
 
-import com.github.cozyplugins.cozylibrary.user.PlayerUser;
+import com.github.cozyplugins.cozylibrary.task.TaskContainer;
+import com.github.minemaniauk.minemaniatntrun.team.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,11 +33,16 @@ import java.util.UUID;
  * Represents a team player.
  * A player in a bed wars team.
  */
-public class TeamPlayer {
+public class TeamPlayer extends TaskContainer {
+
+    public static final @NotNull String RESPAWN_TASK_IDENTIFIER = "RESPAWN_TASK_IDENTIFIER";
+    public static final @NotNull Duration RESPAWN_TIME_LENGTH = Duration.ofSeconds(5);
 
     private final @NotNull Team teamPointer;
     private final @NotNull UUID playerUuid;
     private final @NotNull ArmorType armourType;
+
+    private boolean isDead;
 
     /**
      * Used to create a new team player.
@@ -46,6 +54,8 @@ public class TeamPlayer {
         this.teamPointer = team;
         this.playerUuid = playerUuid;
         this.armourType = ArmorType.NONE;
+
+        this.isDead = false;
     }
 
     /**
@@ -92,5 +102,59 @@ public class TeamPlayer {
      */
     public @NotNull ArmorType getArmourType() {
         return this.armourType;
+    }
+
+    public boolean isDead() {
+        return this.isDead;
+    }
+
+    /**
+     * Used to kill the player.
+     * This will put them in spectator and if the
+     * bed is still active, start the respawn timer.
+     *
+     * @return This instance.
+     */
+    public @NotNull TeamPlayer kill() {
+        this.isDead = true;
+
+        this.getPlayer().ifPresent(player -> {
+            player.teleport(this.getTeam().getLocation().getSpawnPoint());
+            player.setGameMode(GameMode.SPECTATOR);
+        });
+
+        if (this.getTeam().hasBed()) {
+            this.startRespawnTask();
+        }
+
+        return this;
+    }
+
+    public @NotNull TeamPlayer startRespawnTask() {
+
+        long startRespawnTimeMillis = System.currentTimeMillis();
+
+        this.runTaskLoop(TeamPlayer.RESPAWN_TASK_IDENTIFIER, () -> {
+
+            final long endTimeMills = startRespawnTimeMillis + TeamPlayer.RESPAWN_TIME_LENGTH.toMillis();
+
+            if (endTimeMills <= System.currentTimeMillis()) {
+                this.respawn();
+                this.stopTask(TeamPlayer.RESPAWN_TASK_IDENTIFIER);
+            }
+
+        }, 20);
+        return this;
+    }
+
+    public @NotNull TeamPlayer respawn() {
+        this.isDead = false;
+
+        this.getPlayer().ifPresent(player -> {
+            player.teleport(this.getTeam().getLocation().getSpawnPoint());
+            player.setGameMode(GameMode.SURVIVAL);
+        });
+
+        return this;
     }
 }

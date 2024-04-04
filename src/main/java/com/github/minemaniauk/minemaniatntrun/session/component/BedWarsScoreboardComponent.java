@@ -86,7 +86,7 @@ public class BedWarsScoreboardComponent extends TaskContainer implements Session
                             "&7",
                             "&7Selecting Teams",
                             "&7",
-                            "&fStarting in &a" + this.getSession().getComponent(BedWarsSelectTeamComponent.class).getCountDown().toSeconds(),
+                            "&fStarting in &a" + this.getSession().getComponent(BedWarsSelectTeamComponent.class).getCountDown().toSeconds() + "s",
                             "&7",
                             "&e63.135.76.209:25565"
                     );

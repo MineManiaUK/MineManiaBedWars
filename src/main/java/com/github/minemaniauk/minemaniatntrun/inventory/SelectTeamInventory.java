@@ -25,11 +25,12 @@ import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
-import com.github.minemaniauk.minemaniatntrun.team.TeamPlayer;
+import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents the select team inventory.
@@ -48,12 +49,13 @@ public class SelectTeamInventory extends CozyInventory {
 
         this.session = session;
 
-        // Start regenerating to update teams.
-        this.startRegeneratingInventory(2);
+        // Start the regenerating task.
+        this.startRegeneratingInventory(4);
     }
 
     @Override
     protected void onGenerate(PlayerUser user) {
+        this.resetInventory();
 
         final int maxTeamSize = this.session.getPlayerUuids().size() / this.session.getTeamList().size();
 
@@ -75,26 +77,34 @@ public class SelectTeamInventory extends CozyInventory {
 
             final TeamColor color = team.getLocation().getColor();
 
-            final InventoryItem item = new InventoryItem()
-                    .setMaterial(color.getMaterial())
+            final List<String> lore = new java.util.ArrayList<>(List.of(
+                    "&7Click to join this team.",
+                    "&7",
+                    "&f&lPlayers &7[&f" + team.getPlayerList().size() + "&7/&f" + maxTeamSize + "&7]"
+            ));
+            for (TeamPlayer player : team.getPlayerList()) {
+                lore.add("&7- &f" + player.getName());
+            }
+
+            this.setItem(new InventoryItem()
+                    .setMaterial(color.getBed())
                     .setName(color.getColorCode() + "&l" + color.getTitle())
-                    .setLore("&7Click to join this team.",
-                            "&7",
-                            "&f&lPlayers &7[&f" + team.getPlayerList().size() + "&7/&f" + maxTeamSize + "&7]")
+                    .setLore(lore)
                     .addAction((ClickAction) (player, type, inventory) -> {
+
                         if (team.getPlayerList().size() >= maxTeamSize) {
                             player.sendMessage("&7&l> &7This team already has the max amount of players.");
                             return;
                         }
 
+                        final Optional<Team> optionalTeam = this.session.getTeam(player.getUuid());
+                        optionalTeam.ifPresent(value -> value.removePlayer(player.getUuid()));
+
+                        player.sendMessage("&a&l> &aJoined the &f" + color.getName() + "&a team.");
                         team.addPlayer(player.getUuid());
-                    });
-
-            for (TeamPlayer player : team.getPlayerList()) {
-                item.addLore("&7- &f" + player.getName());
-            }
-
-            this.setItem(item);
+                    })
+                    .addSlot(slotIterator.next())
+            );
         }
     }
 }

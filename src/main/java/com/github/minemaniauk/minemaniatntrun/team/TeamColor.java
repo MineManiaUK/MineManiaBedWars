@@ -25,29 +25,32 @@ import org.jetbrains.annotations.NotNull;
  * Represents the available team colors.
  */
 public enum TeamColor {
-    RED("Red", "&c", Material.RED_DYE),
-    ORANGE("Orange", "&6", Material.ORANGE_DYE),
-    YELLOW("Yellow", "&e", Material.YELLOW_DYE),
-    GREEN("Green", "&a", Material.LIME_DYE),
-    BLUE("Blue", "&b", Material.LIGHT_BLUE_DYE),
-    PINK("Pink", "&d", Material.PINK_DYE),
-    WHITE("White", "&f", Material.WHITE_DYE),
-    GRAY("Gray", "&7", Material.GRAY_DYE);
+    RED("Red", "&c", Material.RED_BED, Material.RED_WOOL),
+    ORANGE("Orange", "&6", Material.ORANGE_BED, Material.ORANGE_WOOL),
+    YELLOW("Yellow", "&e", Material.YELLOW_BED, Material.YELLOW_WOOL),
+    GREEN("Green", "&a", Material.LIME_BED, Material.LIME_WOOL),
+    BLUE("Blue", "&b", Material.LIGHT_BLUE_BED, Material.LIGHT_BLUE_WOOL),
+    PINK("Pink", "&d", Material.PINK_BED, Material.PINK_WOOL),
+    WHITE("White", "&f", Material.WHITE_BED, Material.WHITE_WOOL),
+    GRAY("Gray", "&7", Material.GRAY_BED, Material.GRAY_WOOL);
 
     private final @NotNull String title;
     private final @NotNull String colorCode;
-    private final @NotNull Material material;
+    private final @NotNull Material bed;
+    private final @NotNull Material wool;
 
     /**
      * Used to create a new team color.
      *
      * @param title     The title of the team color.
      * @param colorCode The color code to use.
+     * @param bed The material of the color teams bed.
      */
-    TeamColor(@NotNull String title, @NotNull String colorCode, @NotNull Material material) {
+    TeamColor(@NotNull String title, @NotNull String colorCode, @NotNull Material bed, @NotNull Material wool) {
         this.title = title;
         this.colorCode = colorCode;
-        this.material = material;
+        this.bed = bed;
+        this.wool = wool;
     }
 
     public @NotNull String getTitle() {
@@ -62,7 +65,11 @@ public enum TeamColor {
         return this.colorCode;
     }
 
-    public @NotNull Material getMaterial() {
-        return this.material;
+    public @NotNull Material getBed() {
+        return this.bed;
+    }
+
+    public @NotNull Material getWool() {
+         return this.wool;
     }
 }

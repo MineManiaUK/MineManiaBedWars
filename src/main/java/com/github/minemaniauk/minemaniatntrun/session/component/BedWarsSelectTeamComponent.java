@@ -55,6 +55,8 @@ public class BedWarsSelectTeamComponent extends TaskContainer implements Session
     @Override
     public void start() {
 
+        this.startTimeStamp = System.currentTimeMillis();
+
         this.getSession().setStatus(BedWarsStatus.SELECTING_TEAMS);
 
         this.runTaskLoop(SELECT_TEAMS_IDENTIFIER, () -> {
@@ -66,7 +68,12 @@ public class BedWarsSelectTeamComponent extends TaskContainer implements Session
                 new SelectTeamInventory(this.getSession()).open(player);
             }
 
-        }, 20);
+            if (getCountDown().toSeconds() < 0) {
+                this.getSession().onStartGame();
+                this.stop();
+            }
+
+        }, 100);
     }
 
     @Override
