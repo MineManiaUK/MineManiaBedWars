@@ -33,7 +33,7 @@ import java.util.Arrays;
  * the generator will drop.
  */
 public enum GeneratorType {
-    TEAM {
+    TEAM("&f", "Team Generator") {
         @Override
         public @NotNull GeneratorType generate(@NotNull Location location, int level) {
             if (level == 1) {
@@ -82,7 +82,7 @@ public enum GeneratorType {
             return Duration.ofSeconds(1);
         }
     },
-    DIAMOND {
+    DIAMOND("&b", "Diamond Generator") {
         @Override
         public @NotNull GeneratorType generate(@NotNull Location location, int level) {
             this.generate(location, Material.DIAMOND);
@@ -98,7 +98,7 @@ public enum GeneratorType {
             };
         }
     },
-    EMERALD {
+    EMERALD("&a", "Emerald Generator") {
         @Override
         public @NotNull GeneratorType generate(@NotNull Location location, int level) {
             this.generate(location, Material.EMERALD);
@@ -127,15 +127,28 @@ public enum GeneratorType {
      */
     private int step;
 
+    private @NotNull String colorCode;
+    private @NotNull String title;
+
     /**
      * Used to create a new generator type.
      */
-    GeneratorType() {
+    GeneratorType(@NotNull String colorCode, @NotNull String title) {
         this.step = 0;
+        this.colorCode = colorCode;
+        this.title = title;
     }
 
     public int getStep() {
         return this.step;
+    }
+
+    public @NotNull String getColorCode() {
+        return this.colorCode;
+    }
+
+    public @NotNull String getTitle() {
+        return this.title;
     }
 
     public @NotNull GeneratorType setStep(int step) {

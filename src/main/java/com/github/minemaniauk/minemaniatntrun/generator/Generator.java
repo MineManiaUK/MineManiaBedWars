@@ -19,9 +19,15 @@
 package com.github.minemaniauk.minemaniatntrun.generator;
 
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
+import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.api.holograms.HologramPage;
 import org.bukkit.Location;
-import org.bukkit.entity.Panda;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+
+import java.time.Duration;
+import java.util.UUID;
 
 /**
  * Represents an active generator.
@@ -34,6 +40,7 @@ public class Generator extends TaskContainer {
 
     private int level;
     private long lastDropTimeStamp;
+    private @NotNull String hologramIdentifier;
 
     /**
      * Used to create a new active generator.
@@ -56,6 +63,13 @@ public class Generator extends TaskContainer {
         // Generate the first drops.
         this.generate();
 
+        this.hologramIdentifier = UUID.randomUUID().toString();
+
+        // Create the hologram.
+        Hologram hologram = DHAPI.createHologram(this.hologramIdentifier, this.getHologramLocation());
+        DHAPI.addHologramLine(hologram, "");
+        DHAPI.addHologramLine(hologram, "");
+
         // Start the task.
         this.runTaskLoop(Generator.GENERATOR_DROP_TASK_IDENTIFIER, () -> {
 
@@ -64,6 +78,14 @@ public class Generator extends TaskContainer {
             if (nextDropTimeStamp <= System.currentTimeMillis()) {
                 this.generate();
             }
+
+            DHAPI.setHologramLine(hologram, 0, this.getType().getColorCode() + "&l" + this.getType().getTitle());
+            DHAPI.setHologramLine(hologram, 1,
+                    "&7Spawning in " + this.getType().getColorCode()
+                            + this.getTimeTillNextDrop().getSeconds() + "s"
+                            + " &7(&f1/" + this.getType().getCooldown(this.level).getSeconds()
+                            + "s&7)"
+            );
 
         }, 10);
         return this;
@@ -76,6 +98,7 @@ public class Generator extends TaskContainer {
      */
     public @NotNull Generator stop() {
         this.stopAllTasks();
+        DHAPI.removeHologram(this.hologramIdentifier);
         return this;
     }
 
@@ -99,12 +122,24 @@ public class Generator extends TaskContainer {
         return this.location.getLocation();
     }
 
+    public @NotNull Location getHologramLocation() {
+        return this.location.getLocation().clone().add(new Vector(0, 2, 0));
+    }
+
     public @NotNull GeneratorType getType() {
         return this.location.getType();
     }
 
     public int getLevel() {
         return this.level;
+    }
+
+    public long getNextDropTimeStamp() {
+        return this.lastDropTimeStamp + this.getType().getCooldown(this.level).toMillis();
+    }
+
+    public @NotNull Duration getTimeTillNextDrop() {
+        return Duration.ofMillis(this.getNextDropTimeStamp() - System.currentTimeMillis());
     }
 
     public @NotNull Generator setLevel(int level) {

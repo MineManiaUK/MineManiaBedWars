@@ -25,10 +25,7 @@ import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArenaFactory;
 import com.github.minemaniauk.minemaniatntrun.generator.Generator;
-import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsBlockInteractionsComponent;
-import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsScoreboardComponent;
-import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsSelectTeamComponent;
-import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsOutOfBoundsComponent;
+import com.github.minemaniauk.minemaniatntrun.session.component.*;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
@@ -53,7 +50,6 @@ public class BedWarsSession extends Session<BedWarsArena> {
     private final @NotNull GameRoomRecord record;
     private @NotNull BedWarsStatus status;
     private @NotNull List<@NotNull Team> teamList;
-    private @NotNull List<@NotNull Generator> generatorList;
 
     /**
      * Used to create a new bed wars session.
@@ -74,21 +70,22 @@ public class BedWarsSession extends Session<BedWarsArena> {
         this.record = optionalRecord.get();
         this.status = BedWarsStatus.SELECTING_TEAMS;
         this.teamList = new ArrayList<>();
-        this.generatorList = new ArrayList<>();
 
         // Populate the team list.
         this.getArena().getTeamLocationList().forEach(
                 location -> this.teamList.add(new Team(location))
         );
 
+        this.registerComponent(new BedWarsBlockInteractionsComponent(this));
+        this.registerComponent(new BedWarsGeneratorComponent(this));
+        this.registerComponent(new BedWarsNPCComponent(this));
+        this.registerComponent(new BedWarsOutOfBoundsComponent(this));
         this.registerComponent(new BedWarsScoreboardComponent(this));
         this.registerComponent(new BedWarsSelectTeamComponent(this));
-        this.registerComponent(new BedWarsOutOfBoundsComponent(this));
-        this.registerComponent(new BedWarsBlockInteractionsComponent(this));
 
+        this.getComponent(BedWarsOutOfBoundsComponent.class).start();
         this.getComponent(BedWarsScoreboardComponent.class).start();
         this.getComponent(BedWarsSelectTeamComponent.class).start();
-        this.getComponent(BedWarsOutOfBoundsComponent.class).start();
     }
 
     /**
@@ -124,11 +121,6 @@ public class BedWarsSession extends Session<BedWarsArena> {
         // Ensure the teams are made.
         this.ensureTeams();
 
-        // Setup generators and start the generating.
-        this.getArena().getGeneratorLocationList().forEach(
-                location -> this.generatorList.add(new Generator(location).start())
-        );
-
         // Teleport players to the correct area.
         this.teleportTeams();
         this.getOnlinePlayers().forEach(player -> {
@@ -136,8 +128,11 @@ public class BedWarsSession extends Session<BedWarsArena> {
             player.getInventory().clear();
         });
 
-        // Spawn the shop villagers.
-        this.spawnShops();
+        // Start the npc component.
+        this.getComponent(BedWarsNPCComponent.class).start();
+
+        // Start generator component.
+        this.getComponent(BedWarsGeneratorComponent.class).start();
     }
 
     /**
@@ -175,24 +170,6 @@ public class BedWarsSession extends Session<BedWarsArena> {
     public @NotNull BedWarsSession teleportTeams() {
         for (Team team : this.teamList) {
             team.teleportPlayers();
-        }
-        return this;
-    }
-
-    public @NotNull BedWarsSession spawnShops() {
-        for (Team team : this.getTeamList()) {
-            assert team.getLocation().getShopLocation() != null;
-
-            final World world = team.getLocation().getShopLocation().getWorld();
-            assert world != null;
-
-            Villager shopVillager = (Villager) world.spawnEntity(team.getLocation().getShopLocation(), EntityType.VILLAGER);
-            shopVillager.setCustomNameVisible(true);
-            shopVillager.setCustomName(MessageManager.parse("&6&lShop"));
-            shopVillager.setGravity(false);
-            shopVillager.setInvulnerable(true);
-            shopVillager.setPersistent(true);
-            shopVillager.setAI(false);
         }
         return this;
     }

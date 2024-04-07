@@ -120,7 +120,6 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
         // Check if the block is part of the build.
         if (!this.blockLocationList.contains(event.getBlock().getLocation())) {
             event.setCancelled(true);
-            return;
         }
     }
 
