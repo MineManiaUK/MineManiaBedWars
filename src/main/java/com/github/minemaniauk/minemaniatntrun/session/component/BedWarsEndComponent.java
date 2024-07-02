@@ -46,12 +46,13 @@ public class BedWarsEndComponent extends TaskContainer implements SessionCompone
 
     @Override
     public void start() {
-        // Set the start time stamp.
+
+        // Set the end time stamp.
         this.startTimeStamp = System.currentTimeMillis();
 
         this.runTaskLoop(END_IDENTIFIER, () -> {
 
-            // Check if it's time to start the game.
+            // Check if it's time to end the game.
             if (startTimeStamp + toWait.toMillis() < System.currentTimeMillis()) {
                 this.stop();
                 this.getSession().endGameFully();

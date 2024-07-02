@@ -23,6 +23,7 @@ import com.github.cozyplugins.cozylibrary.inventory.InventoryItem;
 import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
+import com.github.minemaniauk.minemaniatntrun.session.BedWarsStatus;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
@@ -56,6 +57,10 @@ public class SelectTeamInventory extends CozyInventory {
     @Override
     protected void onGenerate(PlayerUser user) {
         this.resetInventory();
+
+        if (this.session.getStatus() != BedWarsStatus.SELECTING_TEAMS) {
+            this.close();
+        }
 
         final int maxTeamSize = (int) Math.ceil((double) this.session.getPlayerUuids().size() / this.session.getTeamList().size());
 
