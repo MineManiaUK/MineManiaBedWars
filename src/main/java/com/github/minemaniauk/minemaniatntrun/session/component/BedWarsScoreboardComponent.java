@@ -113,7 +113,7 @@ public class BedWarsScoreboardComponent extends TaskContainer implements Session
         for (Team team : this.getSession().getTeamList()) {
             scoreboard.addLines(team.getLocation().getColor().getColorCode()
                     + "► &f" + team.getLocation().getColor().getTitle()
-                    + (team.hasBed() ? " &a✔" : (team.getAlivePlayers().isEmpty() ? "&c❌" : "&e" + team.getAlivePlayers().size() + "/" + team.getPlayerList().size()))
+                    + (team.hasBed() ? " &a✔" : (team.getAlivePlayers().isEmpty() ? " &c❌" : " &e" + team.getAlivePlayers().size() + "/" + team.getPlayerList().size()))
             );
         }
 
