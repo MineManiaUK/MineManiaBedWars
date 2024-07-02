@@ -55,7 +55,8 @@ public class UpgradeInventory extends CozyInventory {
         if (this.teamPlayer.getTeam().getUpgrade(BedWarsUpgrade.SHARPNESS).getLevel() <= 0) {
             this.setUpgradeItem(BedWarsUpgrade.SHARPNESS, 19);
         } else {
-            this.setItem(new CozyItem()
+            this.setItem(new InventoryItem()
+                    .addSlot(19)
                     .setMaterial(Material.BLACK_STAINED_GLASS)
                     .setName("&f&lSharpness")
                     .setLore("&eAlready brought")
