@@ -18,6 +18,7 @@
 
 package com.github.minemaniauk.minemaniatntrun.team;
 
+import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -34,12 +35,19 @@ import java.util.stream.Collectors;
  */
 public class Team {
 
+    private final @NotNull BedWarsSession sessionPointer;
+
     private final @NotNull TeamLocation location;
     private final @NotNull List<TeamPlayer> playerList;
 
-    public Team(@NotNull TeamLocation location) {
+    public Team(@NotNull BedWarsSession sessionPointer, @NotNull TeamLocation location) {
+        this.sessionPointer = sessionPointer;
         this.location = location;
         this.playerList = new ArrayList<>();
+    }
+
+    public @NotNull BedWarsSession getSession() {
+        return sessionPointer;
     }
 
     /**
@@ -157,5 +165,12 @@ public class Team {
 
     public @NotNull List<TeamPlayer> getAlivePlayers() {
         return this.playerList.stream().filter(player -> !player.isDead()).toList();
+    }
+
+    public boolean isOut() {
+        if (this.hasBed()) return false;
+        return !this.getPlayerList().stream()
+                .map(TeamPlayer::isDead).toList()
+                .contains(false);
     }
 }

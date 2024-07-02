@@ -19,8 +19,12 @@
 package com.github.minemaniauk.minemaniatntrun.session;
 
 import com.github.cozyplugins.cozylibrary.MessageManager;
+import com.github.cozyplugins.cozylibrary.user.PlayerUser;
+import com.github.minemaniauk.api.MineManiaLocation;
+import com.github.minemaniauk.api.database.collection.UserCollection;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.game.session.Session;
+import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArenaFactory;
@@ -30,6 +34,7 @@ import com.github.minemaniauk.minemaniatntrun.team.Team;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
@@ -37,6 +42,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,6 +58,8 @@ public class BedWarsSession extends Session<BedWarsArena> {
     private final @NotNull GameRoomRecord record;
     private @NotNull BedWarsStatus status;
     private @NotNull List<@NotNull Team> teamList;
+
+    private Team winningTeam;
 
     /**
      * Used to create a new bed wars session.
@@ -73,7 +83,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
 
         // Populate the team list.
         this.getArena().getTeamLocationList().forEach(
-                location -> this.teamList.add(new Team(location))
+                location -> this.teamList.add(new Team(this, location))
         );
 
         this.registerComponent(new BedWarsBlockInteractionsComponent(this));
@@ -82,6 +92,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
         this.registerComponent(new BedWarsOutOfBoundsComponent(this));
         this.registerComponent(new BedWarsScoreboardComponent(this));
         this.registerComponent(new BedWarsSelectTeamComponent(this));
+        this.registerComponent(new BedWarsEndComponent(this));
 
         this.getComponent(BedWarsOutOfBoundsComponent.class).start();
         this.getComponent(BedWarsScoreboardComponent.class).start();
@@ -108,6 +119,27 @@ public class BedWarsSession extends Session<BedWarsArena> {
      */
     public void onBlockPlace(@NotNull BlockPlaceEvent event, @Nullable TeamLocation teamLocation) {
         this.getComponent(BedWarsBlockInteractionsComponent.class).onBlockPlace(event, teamLocation);
+    }
+
+    public void onPlayerDeath(@NotNull EntityDamageEvent event) {
+        Player player = (Player) event.getEntity();
+
+        if (player.getHealth() - event.getDamage() > 0) {
+            return;
+        }
+
+        event.setCancelled(true);
+        player.setHealth(player.getMaxHealth());
+
+        TeamPlayer teamPlayer = this.getTeamPlayer(player.getUniqueId()).orElse(null);
+        if (teamPlayer == null) return;
+
+        teamPlayer.kill();
+    }
+
+    public void onPlayerDeath(@NotNull TeamPlayer player) {
+        Bukkit.broadcastMessage(MessageManager.parse("&7&l> &7" + player.getName() + " died."));
+        if (this.shouldEnd()) this.onEnd();
     }
 
     /**
@@ -138,6 +170,47 @@ public class BedWarsSession extends Session<BedWarsArena> {
 
         // Start generator component.
         this.getComponent(BedWarsGeneratorComponent.class).start();
+    }
+
+    public void onEnd() {
+        Team winningTeam = this.getWinningTeam();
+        this.setStatus(BedWarsStatus.ENDING);
+
+        final int pawReward = (this.getPlayerUuids().size() - 1) * 10;
+
+        for (TeamPlayer teamPlayer : winningTeam.getPlayerList()) {
+
+            // Give the winner the correct amount of paws.
+            MineManiaBedWars.getAPI().getDatabase()
+                    .getTable(UserCollection.class)
+                    .getUserRecord(teamPlayer.getPlayerUuid())
+                    .ifPresent(user -> {
+                        user.addPaws(pawReward);
+                        MineManiaBedWars.getAPI().getDatabase()
+                                .getTable(UserCollection.class)
+                                .insertRecord(user);
+                    });
+
+            // Send a message.
+            teamPlayer.getPlayer().ifPresent(
+                    player -> new PlayerUser(player).sendMessage("&a&l> &aYou have gained " + pawReward + " paws for winning.")
+            );
+        }
+
+        this.getComponent(BedWarsEndComponent.class).stop();
+    }
+
+    public void endGameFully() {
+        MineManiaLocation location = new MineManiaLocation("hub", "null", 0, 0, 0);
+
+        // Teleport the players.
+        for (Player player : this.getOnlinePlayers()) {
+            MineManiaUser user = new MineManiaUser(player.getUniqueId(), player.getName());
+            user.getActions().teleport(location);
+        }
+
+        // Stop the arena and unregister the session.
+        this.getArena().deactivate();
     }
 
     /**
@@ -301,5 +374,30 @@ public class BedWarsSession extends Session<BedWarsArena> {
     public @NotNull BedWarsSession setStatus(@NotNull BedWarsStatus status) {
         this.status = status;
         return this;
+    }
+
+    public boolean shouldEnd() {
+        int amountIn = 0;
+
+        for (Team team : this.getTeamList()) {
+            if (team.isOut()) continue;
+            amountIn++;
+        }
+
+        return amountIn <= 1;
+    }
+
+    public @NotNull Team getWinningTeam() {
+
+        if (this.winningTeam != null) {
+            return this.winningTeam;
+        }
+
+        for (Team team : this.getTeamList()) {
+            if (team.isOut()) continue;
+            this.winningTeam = team;
+            return team;
+        }
+        throw new RuntimeException("All teams are out.");
     }
 }

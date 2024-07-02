@@ -22,6 +22,7 @@ import com.github.cozyplugins.cozylibrary.MessageManager;
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.BedWarsItem;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -137,6 +138,8 @@ public class TeamPlayer extends TaskContainer {
      */
     public @NotNull TeamPlayer kill() {
         this.isDead = true;
+
+        this.getTeam().getSession().onPlayerDeath(this);
 
         this.getPlayer().ifPresent(player -> {
             player.teleport(this.getTeam().getLocation().getSpawnPoint());

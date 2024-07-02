@@ -78,7 +78,17 @@ public class BedWarsScoreboardComponent extends TaskContainer implements Session
      */
     public @NotNull Scoreboard generateScoreboard() {
         if (this.getSession().getStatus().equals(BedWarsStatus.ENDING)) {
-            return new Scoreboard();
+            Team winningTeam = this.getSession().getWinningTeam();
+            return new Scoreboard()
+                    .setTitle("&e&lBED WARS")
+                    .setLines("&8" + this.getSession().getArenaIdentifier().toString().substring(0, 7),
+                            "&7",
+                            "&fWinner " + winningTeam.getLocation().getColor().getColorCode() + winningTeam.getLocation().getColor().getTitle(),
+                            "&7",
+                            "&7Ending in &f" + this.getSession().getComponent(BedWarsEndComponent.class).getCountDown().toSeconds(),
+                            "&7",
+                            "&eplay.minemania.co"
+                    );
         }
         if (this.getSession().getStatus().equals(BedWarsStatus.SELECTING_TEAMS)) {
             return new Scoreboard()

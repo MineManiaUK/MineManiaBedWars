@@ -42,7 +42,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -186,6 +188,24 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         if (villager.getName().contains("Shop")) {
             new ShopInventory(teamPlayer).open(event.getPlayer());
         }
+    }
+
+    @EventHandler
+    public void onPlayerDamage(EntityDamageEvent event) {
+
+        if (!(event.getEntity() instanceof Player)) return;
+
+        final Location location = event.getEntity().getLocation();
+
+        // Check if it was in an arena.
+        final BedWarsArena arena = this.getArena(location).orElse(null);
+        if (arena == null) return;
+
+        // Check if the arena is in a session.
+        BedWarsSession session = this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
+        if (session == null) return;
+
+        session.onPlayerDeath(event);
     }
 
     /**
