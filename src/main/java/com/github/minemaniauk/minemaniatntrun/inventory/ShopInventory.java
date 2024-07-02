@@ -18,28 +18,35 @@
 
 package com.github.minemaniauk.minemaniatntrun.inventory;
 
+import com.github.cozyplugins.cozylibrary.MessageManager;
 import com.github.cozyplugins.cozylibrary.inventory.CozyInventory;
 import com.github.cozyplugins.cozylibrary.inventory.InventoryItem;
+import com.github.cozyplugins.cozylibrary.inventory.InventoryManager;
 import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.BedWarsItem;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Represents the bed wars shop inventory.
  */
 public class ShopInventory extends CozyInventory {
 
-    private final @NotNull TeamPlayer teamPlayer;
+    protected final @NotNull TeamPlayer teamPlayer;
 
     /**
      * Used to create a new shop inventory.
@@ -51,6 +58,11 @@ public class ShopInventory extends CozyInventory {
 
         // Start regenerating just in case someone gives them items while the inventory is still open.
         this.startRegeneratingInventory(20);
+    }
+
+    public ShopInventory(int size, @NotNull String title, @NotNull TeamPlayer teamPlayer) {
+        super(size, title);
+        this.teamPlayer = teamPlayer;
     }
 
     @Override
