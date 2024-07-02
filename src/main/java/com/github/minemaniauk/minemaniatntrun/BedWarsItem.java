@@ -35,26 +35,67 @@ import java.util.Optional;
  */
 public enum BedWarsItem {
 
+    // Tools.
+    WOODEN_AXE(() -> new CozyItem(Material.WOODEN_AXE)
+            .setName("Wooden Axe")
+            .setLore("&7- This item will stay with you when you die.")
+            .setUnbreakable(true),
+            Material.IRON_INGOT,
+            20
+    ),
+    STONE_AXE(() -> new CozyItem(Material.STONE_AXE)
+            .setName("Stone Axe")
+            .setLore("&7- This item will disappear when you die.")
+            .setUnbreakable(true),
+            Material.GOLD_INGOT,
+            5
+    ),
+    WOODEN_PICKAXE(() -> new CozyItem(Material.WOODEN_PICKAXE)
+            .setName("Wooden Pickaxe")
+            .setLore("&7- This item will stay with you when you die.")
+            .setUnbreakable(true),
+            Material.IRON_INGOT,
+            20
+    ),
+    STONE_PICKAXE(() -> new CozyItem(Material.STONE_PICKAXE)
+            .setName("Stone Pickaxe")
+            .setLore("&7- This item will disappear when you die.")
+            .setUnbreakable(true),
+            Material.GOLD_INGOT,
+            5
+    ),
+    SHEARS(() -> new CozyItem(Material.SHEARS)
+            .setName("Shears")
+            .setLore("&7- This item will stay with you when you die.")
+            .setUnbreakable(true),
+            Material.IRON_INGOT,
+            20
+    ),
+
     // Swords.
     WOODEN_SWORD(() -> new CozyItem(Material.WOODEN_SWORD)
             .setName("Wooden Sword")
             .setLore("&7- This item will stay with you when you die.")
+            .setUnbreakable(true)
     ),
     STONE_SWORD(() -> new CozyItem(Material.STONE_SWORD)
             .setName("Stone Sword")
-            .setLore("&7- This item will disappear when you die."),
+            .setLore("&7- This item will disappear when you die.")
+            .setUnbreakable(true),
             Material.IRON_INGOT,
             10
     ),
     IRON_SWORD(() -> new CozyItem(Material.IRON_SWORD)
             .setName("Iron Sword")
-            .setLore("&7- This item will disappear when you die."),
+            .setLore("&7- This item will disappear when you die.")
+            .setUnbreakable(true),
             Material.GOLD_INGOT,
             7
     ),
     DIAMOND_SWORD(() -> new CozyItem(Material.DIAMOND_SWORD)
             .setName("Diamond Sword")
-            .setLore("&7- This item will disappear when you die."),
+            .setLore("&7- This item will disappear when you die.")
+            .setUnbreakable(true),
             Material.EMERALD,
             3
     ),
@@ -69,7 +110,8 @@ public enum BedWarsItem {
     ),
     BOW(() -> new CozyItem(Material.BOW)
             .setName("Bow")
-            .setLore("&7- This item will disappear when you die."),
+            .setLore("&7- This item will disappear when you die.")
+            .setUnbreakable(true),
             Material.GOLD_INGOT,
             12
     ),
@@ -77,7 +119,8 @@ public enum BedWarsItem {
             .setName("Enchanted Bow")
             .setLore("&7- This item will disappear when you die.")
             .addEnchantment(Enchantment.ARROW_DAMAGE, 1)
-            .addEnchantment(Enchantment.ARROW_KNOCKBACK, 1),
+            .addEnchantment(Enchantment.ARROW_KNOCKBACK, 1)
+            .setUnbreakable(true),
             Material.EMERALD,
             6
     ),

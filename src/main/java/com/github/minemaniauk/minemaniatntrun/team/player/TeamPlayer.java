@@ -49,7 +49,7 @@ public class TeamPlayer extends TaskContainer {
     private @NotNull ArmorType armourType;
     private @Nullable BedWarsItem pickaxe;
     private @Nullable BedWarsItem axe;
-    private @Nullable BedWarsItem sheers;
+    private @Nullable BedWarsItem shears;
 
     private boolean isDead;
 
@@ -117,6 +117,33 @@ public class TeamPlayer extends TaskContainer {
      */
     public @NotNull ArmorType getArmourType() {
         return this.armourType;
+    }
+
+    public boolean hasPickaxe() {
+        return this.pickaxe != null;
+    }
+
+    public boolean hasAxe() {
+        return this.axe != null;
+    }
+
+    public boolean hasShears() {
+        return this.shears != null;
+    }
+
+    public @NotNull TeamPlayer setPickaxe(@NotNull BedWarsItem pickaxe) {
+        this.pickaxe = pickaxe;
+        return this;
+    }
+
+    public @NotNull TeamPlayer setAxe(@NotNull BedWarsItem axe) {
+        this.axe = axe;
+        return this;
+    }
+
+    public @NotNull TeamPlayer setShears(@NotNull BedWarsItem shears) {
+        this.shears = shears;
+        return this;
     }
 
     /**
@@ -228,7 +255,7 @@ public class TeamPlayer extends TaskContainer {
             // Add the obtainable items that are saved.
             if (this.pickaxe != null) inventory.addItem(this.pickaxe.create());
             if (this.axe != null) inventory.addItem(this.axe.create());
-            if (this.sheers != null) inventory.addItem(this.sheers.create());
+            if (this.shears != null) inventory.addItem(this.shears.create());
         });
 
         return this;

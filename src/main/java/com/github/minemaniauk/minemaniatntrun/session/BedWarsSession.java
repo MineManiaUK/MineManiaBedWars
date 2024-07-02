@@ -153,6 +153,11 @@ public class BedWarsSession extends Session<BedWarsArena> {
         // Ensure the teams are made.
         this.ensureTeams();
 
+        if (this.getOnlinePlayers().size() <= 1) {
+            this.endGameFully();
+            return;
+        }
+
         // Teleport players to the correct area.
         this.teleportTeams();
 

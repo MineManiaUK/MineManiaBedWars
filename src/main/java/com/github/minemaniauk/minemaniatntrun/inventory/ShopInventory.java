@@ -56,6 +56,9 @@ public class ShopInventory extends CozyInventory {
     @Override
     protected void onGenerate(PlayerUser user) {
 
+        // Tools.
+        this.setTools();
+
         // Swords.
         this.setSimpleBuyItem(BedWarsItem.DIAMOND_SWORD, 11);
         this.setSimpleBuyItem(BedWarsItem.IRON_SWORD, 20);
@@ -72,12 +75,13 @@ public class ShopInventory extends CozyInventory {
         this.setSimpleBuyItem(BedWarsItem.OAK_PLANKS, 31);
 
         // Wool.
-        this.setSimpleBuyItem(
+        this.setBuyItem(
                 "&f&lWool",
                 new CozyItem(this.teamPlayer.getTeam().getLocation().getColor().getWool()).setAmount(16),
                 Material.IRON_INGOT,
                 4,
-                40
+                40,
+                () -> {}
         );
 
         this.setSimpleBuyItem(BedWarsItem.GLASS, 14);
@@ -100,26 +104,54 @@ public class ShopInventory extends CozyInventory {
         this.setSimpleBuyItem(BedWarsItem.GOLDEN_APPLE, 43);
     }
 
+    public void setTools() {
+
+        if (this.teamPlayer.hasAxe()) this.setSimpleBuyItem(BedWarsItem.STONE_AXE, 37);
+        else this.setBuyItem(BedWarsItem.WOODEN_AXE, 37, () -> this.teamPlayer.setAxe(BedWarsItem.WOODEN_AXE));
+
+        if (this.teamPlayer.hasPickaxe()) this.setSimpleBuyItem(BedWarsItem.STONE_PICKAXE, 38);
+        else this.setBuyItem(BedWarsItem.WOODEN_PICKAXE, 38, () -> this.teamPlayer.setPickaxe(BedWarsItem.WOODEN_PICKAXE));
+
+        if (!this.teamPlayer.hasShears()) this.setBuyItem(BedWarsItem.SHEARS, 39, () -> {
+            this.teamPlayer.setShears(BedWarsItem.SHEARS);
+        });
+    }
+
     public void setSimpleBuyItem(@NotNull BedWarsItem item, int slot) {
         final CozyItem cozyItem = new CozyItem(item.create());
-        this.setSimpleBuyItem(
+        this.setBuyItem(
                 item.getTitle(),
                 cozyItem,
                 item.getCostMaterial().orElse(Material.IRON_INGOT),
                 item.getCostAmount().orElse(1),
-                slot
+                slot,
+                () -> {}
         );
     }
 
-    public void setSimpleBuyItem(@NotNull String name,
+
+    public void setBuyItem(@NotNull BedWarsItem item, int slot, @NotNull Runnable runnable) {
+        final CozyItem cozyItem = new CozyItem(item.create());
+        this.setBuyItem(
+                item.getTitle(),
+                cozyItem,
+                item.getCostMaterial().orElse(Material.IRON_INGOT),
+                item.getCostAmount().orElse(1),
+                slot,
+                () -> {}
+        );
+    }
+
+    public void setBuyItem(@NotNull String name,
                                  @NotNull CozyItem item,
                                  @NotNull Material costMaterial,
                                  int costAmount,
-                                 int slot) {
+                                 int slot,
+                                 Runnable onPurchase) {
 
         this.setItem(new InventoryItem(item.create())
                 .setName(name)
-                .setLore("&7You will lose this item when you die.",
+                .setLore(item.getLore().isEmpty() ? "&7This item will disappear when you die." : item.getLore().get(0) ,
                         "&7",
                         "&fCost &e" + costAmount + "x &a" + costMaterial.name().split("_")[0].toLowerCase(),
                         "&7",
@@ -140,6 +172,7 @@ public class ShopInventory extends CozyInventory {
                     this.removeOldSwords(user, item.getMaterial());
                     playerInventory.addItem(item.setName(name.replace("&l", "")).create());
                     user.sendMessage("&a&l> &aYou have brought &e" + item.getName() + "&a for &e" + costAmount + "x &f" + costMaterial.name().split("_")[0].toLowerCase() + "&a.");
+                    onPurchase.run();
                 })
         );
     }
