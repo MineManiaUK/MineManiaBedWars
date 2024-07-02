@@ -123,6 +123,7 @@ public class Team {
      * @return True if the team has a bed.
      */
     public boolean hasBed() {
+        if (this.getPlayerList().isEmpty()) return false;
         return this.getLocation().getRegion().contains(
                 this.getLocation().getColor().getBed()
         );
@@ -139,5 +140,22 @@ public class Team {
             player.getPlayer().orElseThrow().teleport(this.getLocation().getSpawnPoint());
         }
         return this;
+    }
+
+    /**
+     * Used to give each player in the team there
+     * default items.
+     *
+     * @return This instance.
+     */
+    public @NotNull Team giveDefaultItems() {
+        for (TeamPlayer player : this.getOnlinePlayerList()) {
+            player.giveDefaultItems();
+        }
+        return this;
+    }
+
+    public @NotNull List<TeamPlayer> getAlivePlayers() {
+        return this.playerList.stream().filter(player -> !player.isDead()).toList();
     }
 }

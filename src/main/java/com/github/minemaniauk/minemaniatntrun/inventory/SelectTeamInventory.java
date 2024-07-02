@@ -57,7 +57,7 @@ public class SelectTeamInventory extends CozyInventory {
     protected void onGenerate(PlayerUser user) {
         this.resetInventory();
 
-        final int maxTeamSize = this.session.getPlayerUuids().size() / this.session.getTeamList().size();
+        final int maxTeamSize = (int) Math.ceil((double) this.session.getPlayerUuids().size() / this.session.getTeamList().size());
 
         // The list of slots.
         List<Integer> slotList = List.of(

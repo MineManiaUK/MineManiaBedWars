@@ -18,12 +18,17 @@
 
 package com.github.minemaniauk.minemaniatntrun.team.player;
 
+import com.github.cozyplugins.cozylibrary.MessageManager;
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
+import com.github.cozyplugins.cozylibrary.user.PlayerUser;
+import com.github.minemaniauk.minemaniatntrun.BedWarsItem;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -40,14 +45,17 @@ public class TeamPlayer extends TaskContainer {
 
     private final @NotNull Team teamPointer;
     private final @NotNull UUID playerUuid;
-    private final @NotNull ArmorType armourType;
+    private @NotNull ArmorType armourType;
+    private @Nullable BedWarsItem pickaxe;
+    private @Nullable BedWarsItem axe;
+    private @Nullable BedWarsItem sheers;
 
     private boolean isDead;
 
     /**
      * Used to create a new team player.
      *
-     * @param team The instance of the team the player is in.
+     * @param team       The instance of the team the player is in.
      * @param playerUuid The player's uuid.
      */
     public TeamPlayer(@NotNull Team team, @NotNull UUID playerUuid) {
@@ -90,6 +98,12 @@ public class TeamPlayer extends TaskContainer {
         return Optional.empty();
     }
 
+    /**
+     * Used to get the player's name.
+     * If they have never joined before it will return "null".
+     *
+     * @return The player's name.
+     */
     public @NotNull String getName() {
         final String name = Bukkit.getOfflinePlayer(this.playerUuid).getName();
         return name == null ? "null" : name;
@@ -104,6 +118,12 @@ public class TeamPlayer extends TaskContainer {
         return this.armourType;
     }
 
+    /**
+     * Used to check if the player is dead within the game.
+     * This is different from spigot.
+     *
+     * @return True if the player is dead.
+     */
     public boolean isDead() {
         return this.isDead;
     }
@@ -130,9 +150,27 @@ public class TeamPlayer extends TaskContainer {
         return this;
     }
 
+    /**
+     * Used to start the respawn task.
+     * This will start the count-down till when they
+     * can respawn and then respawn them.
+     *
+     * @return This instance.
+     */
     public @NotNull TeamPlayer startRespawnTask() {
 
         long startRespawnTimeMillis = System.currentTimeMillis();
+
+        this.getPlayer().ifPresent(player -> {
+            player.sendTitle(
+                    "",
+                    MessageManager.parse("&eRespawning in &f" + TeamPlayer.RESPAWN_TIME_LENGTH.getSeconds() + "s"),
+                    20,
+                    80,
+                    20
+            );
+            new PlayerUser(player).sendMessage("&e&l> &eRespawning in &f" + TeamPlayer.RESPAWN_TIME_LENGTH.getSeconds() + "s");
+        });
 
         this.runTaskLoop(TeamPlayer.RESPAWN_TASK_IDENTIFIER, () -> {
 
@@ -147,12 +185,47 @@ public class TeamPlayer extends TaskContainer {
         return this;
     }
 
+    /**
+     * Used to respawn the team player instantly.
+     * If they were not dead originally it will
+     * pretend they died.
+     *
+     * @return This instance.
+     */
     public @NotNull TeamPlayer respawn() {
         this.isDead = false;
 
         this.getPlayer().ifPresent(player -> {
+            player.getInventory().clear();
             player.teleport(this.getTeam().getLocation().getSpawnPoint());
             player.setGameMode(GameMode.SURVIVAL);
+        });
+
+        this.giveDefaultItems();
+        return this;
+    }
+
+    /**
+     * Used to give the player there default items.
+     *
+     * @return This instance.
+     */
+    public @NotNull TeamPlayer giveDefaultItems() {
+
+        // Give the default items if they are online.
+        this.getPlayer().ifPresent(player -> {
+
+            // Get the instance of the inventory.
+            final PlayerInventory inventory = player.getInventory();
+
+            // Add the default wooden sword.
+            BedWarsItem item = BedWarsItem.WOODEN_SWORD;
+            inventory.addItem(item.create());
+
+            // Add the obtainable items that are saved.
+            if (this.pickaxe != null) inventory.addItem(this.pickaxe.create());
+            if (this.axe != null) inventory.addItem(this.axe.create());
+            if (this.sheers != null) inventory.addItem(this.sheers.create());
         });
 
         return this;

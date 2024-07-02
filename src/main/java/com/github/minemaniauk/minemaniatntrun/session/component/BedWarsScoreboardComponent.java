@@ -25,6 +25,7 @@ import com.github.minemaniauk.api.game.session.SessionComponent;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsStatus;
+import com.github.minemaniauk.minemaniatntrun.team.Team;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -88,15 +89,29 @@ public class BedWarsScoreboardComponent extends TaskContainer implements Session
                             "&7",
                             "&fStarting in &a" + this.getSession().getComponent(BedWarsSelectTeamComponent.class).getCountDown().toSeconds() + "s",
                             "&7",
-                            "&e63.135.76.209:25565"
+                            "&eplay.minemania.co"
                     );
         }
-        return new Scoreboard()
-                .setTitle("&e&lBED WARS")
-                .setLines("&8" + this.getSession().getArenaIdentifier().toString().substring(0, 7),
-                        "&7",
-                        "&7",
-                        "&e63.135.76.209:25565"
-                );
+
+        Scoreboard scoreboard = new Scoreboard();
+        scoreboard.setTitle("&e&lBED WARS");
+        scoreboard.setLines(
+                "&8" + this.getSession().getArenaIdentifier().toString().substring(0, 7),
+                "&7"
+        );
+
+        for (Team team : this.getSession().getTeamList()) {
+            scoreboard.addLines(team.getLocation().getColor().getColorCode()
+                    + "► &f" + team.getLocation().getColor().getTitle()
+                    + (team.hasBed() ? " &a✔" : (team.getAlivePlayers().isEmpty() ? "&c❌" : "&e" + team.getAlivePlayers().size() + "/" + team.getPlayerList().size()))
+            );
+        }
+
+        scoreboard.addLines(
+                "&7",
+                "&eplay.minemania.co"
+        );
+
+        return scoreboard;
     }
 }

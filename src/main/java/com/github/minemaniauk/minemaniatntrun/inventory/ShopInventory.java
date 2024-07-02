@@ -23,13 +23,15 @@ import com.github.cozyplugins.cozylibrary.inventory.InventoryItem;
 import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
+import com.github.minemaniauk.minemaniatntrun.BedWarsItem;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
-import net.royawesome.jlibnoise.module.combiner.Power;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -54,96 +56,58 @@ public class ShopInventory extends CozyInventory {
     @Override
     protected void onGenerate(PlayerUser user) {
 
-        // Diamond Sword.
-        this.setSimpleBuyItem(
-                "&a&lDiamond Sword",
-                new CozyItem(Material.DIAMOND_SWORD),
-                Material.EMERALD,
-                4,
-                11
-        );
+        // Swords.
+        this.setSimpleBuyItem(BedWarsItem.DIAMOND_SWORD, 11);
+        this.setSimpleBuyItem(BedWarsItem.IRON_SWORD, 20);
+        this.setSimpleBuyItem(BedWarsItem.STONE_SWORD, 29);
 
-        // Iron Sword.
-        this.setSimpleBuyItem(
-                "&6&lIron Sword",
-                new CozyItem(Material.IRON_SWORD),
-                Material.GOLD_INGOT,
-                7,
-                20
-        );
+        // Bows.
+        this.setSimpleBuyItem(BedWarsItem.ENCHANTED_BOW, 12);
+        this.setSimpleBuyItem(BedWarsItem.BOW, 21);
+        this.setSimpleBuyItem(BedWarsItem.ARROWS, 30);
 
-        // Stone Sword.
-        this.setSimpleBuyItem(
-                "&f&lStone Sword",
-                new CozyItem(Material.IRON_SWORD),
-                Material.IRON_INGOT,
-                10,
-                29
-        );
+        // Blocks
+        this.setSimpleBuyItem(BedWarsItem.OBSIDIAN, 13);
+        this.setSimpleBuyItem(BedWarsItem.END_STONE, 22);
+        this.setSimpleBuyItem(BedWarsItem.OAK_PLANKS, 31);
 
-        // Enchanted Bow.
+        // Wool.
         this.setSimpleBuyItem(
-                "&a&lEnchanted Bow",
-                new CozyItem(Material.BOW)
-                        .addEnchantment(Enchantment.ARROW_DAMAGE, 2)
-                        .addEnchantment(Enchantment.DURABILITY, 2),
-                Material.EMERALD,
-                4,
-                12
-        );
-
-        // Bow.
-        this.setSimpleBuyItem(
-                "&6&lBow",
-                new CozyItem(Material.BOW),
-                Material.GOLD_INGOT,
-                7,
-                21
-        );
-
-        // Arrow.
-        this.setSimpleBuyItem(
-                "&6&lArrow",
-                new CozyItem(Material.ARROW).setAmount(6),
-                Material.GOLD_INGOT,
-                4,
-                30
-        );
-
-        // Obsidian.
-        this.setSimpleBuyItem(
-                "&a&lObsidian",
-                new CozyItem(Material.OBSIDIAN).setAmount(4),
-                Material.EMERALD,
-                3,
-                30
-        );
-
-        // End Stone.
-        this.setSimpleBuyItem(
-                "&f&lEnd Stone",
-                new CozyItem(Material.END_STONE).setAmount(12),
-                Material.IRON_INGOT,
-                12,
-                22
-        );
-
-        // Oak Planks.
-        this.setSimpleBuyItem(
-                "&f&lOak Planks",
-                new CozyItem(Material.OAK_PLANKS).setAmount(16),
-                Material.IRON_INGOT,
-                12,
-                31
-        );
-
-        // Wool Planks.
-        this.setSimpleBuyItem(
-                "&f&lOak Planks",
+                "&f&lWool",
                 new CozyItem(this.teamPlayer.getTeam().getLocation().getColor().getWool()).setAmount(16),
                 Material.IRON_INGOT,
                 4,
                 40
+        );
+
+        this.setSimpleBuyItem(BedWarsItem.GLASS, 14);
+        this.setSimpleBuyItem(BedWarsItem.LADDER, 23);
+
+        // Utility.
+        this.setSimpleBuyItem(BedWarsItem.TNT, 32);
+        this.setSimpleBuyItem(BedWarsItem.FIREBALL, 41);
+        this.setSimpleBuyItem(BedWarsItem.WATER_BUCKET, 15);
+        this.setSimpleBuyItem(BedWarsItem.POPUP_TOWER, 24);
+        this.setSimpleBuyItem(BedWarsItem.BRIDGE_EGG, 33);
+        this.setSimpleBuyItem(BedWarsItem.ENDER_PEARL, 42);
+
+        // Potions
+        this.setSimpleBuyItem(BedWarsItem.SWIFTNESS, 16);
+        this.setSimpleBuyItem(BedWarsItem.JUMP, 25);
+        this.setSimpleBuyItem(BedWarsItem.INVISIBILITY, 34);
+
+        // Golden Apple.
+        this.setSimpleBuyItem(BedWarsItem.GOLDEN_APPLE, 43);
+    }
+
+    public void setSimpleBuyItem(@NotNull BedWarsItem item, int slot) {
+        final CozyItem cozyItem = new CozyItem(item.create());
+        this.setSimpleBuyItem(
+                item.getTitle(),
+                cozyItem,
+                item.getCostMaterial().orElse(Material.IRON_INGOT),
+                item.getCostAmount().orElse(1),
+                slot
         );
     }
 
@@ -157,9 +121,9 @@ public class ShopInventory extends CozyInventory {
                 .setName(name)
                 .setLore("&7You will lose this item when you die.",
                         "&7",
-                        "&fCost &e" + costAmount + "x &a" + costMaterial.name(),
+                        "&fCost &e" + costAmount + "x &a" + costMaterial.name().split("_")[0].toLowerCase(),
                         "&7",
-                        "&7Click to buy " + item.getName())
+                        "&7Click to buy " + name)
                 .addSlot(slot)
                 .addAction((ClickAction) (user, type, inventory) -> {
 
@@ -168,21 +132,38 @@ public class ShopInventory extends CozyInventory {
                     // Check if they have the correct
                     // amount of resources to buy.
                     if (!playerInventory.containsAtLeast(new CozyItem(costMaterial).create(), costAmount)) {
-                        user.sendMessage("&7&l> &7You do not have enough &f" + costMaterial.name() + " &7to buy this.");
+                        user.sendMessage("&7&l> &7You do not have enough &f" + costMaterial.name().split("_")[0].toLowerCase() + " &7to buy this.");
                         return;
                     }
 
                     this.removeResources(costMaterial, costAmount, playerInventory);
-                    playerInventory.addItem(item.create());
-                    user.sendMessage("&a&l> &aYou have brought &e" + costAmount + "x &f" + costMaterial.name() + "&a.");
+                    this.removeOldSwords(user, item.getMaterial());
+                    playerInventory.addItem(item.setName(name.replace("&l", "")).create());
+                    user.sendMessage("&a&l> &aYou have brought &e" + item.getName() + "&a for &e" + costAmount + "x &f" + costMaterial.name().split("_")[0].toLowerCase() + "&a.");
                 })
         );
+    }
+
+    private void removeOldSwords(@NotNull PlayerUser user, @NotNull Material material) {
+        if (material.equals(Material.STONE_SWORD)) {
+            user.getPlayer().getInventory().remove(Material.WOODEN_SWORD);
+        }
+        if (material.equals(Material.IRON_SWORD)) {
+            user.getPlayer().getInventory().remove(Material.WOODEN_SWORD);
+            user.getPlayer().getInventory().remove(Material.STONE_SWORD);
+        }
+        if (material.equals(Material.DIAMOND_SWORD)) {
+            user.getPlayer().getInventory().remove(Material.WOODEN_SWORD);
+            user.getPlayer().getInventory().remove(Material.STONE_SWORD);
+            user.getPlayer().getInventory().remove(Material.IRON_SWORD);
+        }
     }
 
     private void removeResources(@NotNull Material costMaterial, int costAmount, @NotNull Inventory inventory) {
         int amountTaken = 0;
 
         for (ItemStack itemStack : inventory.getContents()) {
+            if (itemStack == null) continue;
             if (itemStack.getType().equals(costMaterial)) {
 
                 final int amountToTake = costAmount - amountTaken;

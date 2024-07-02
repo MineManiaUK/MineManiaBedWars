@@ -73,7 +73,7 @@ public class BedWarsSelectTeamComponent extends TaskContainer implements Session
                 this.stop();
             }
 
-        }, 100);
+        }, 20);
     }
 
     @Override

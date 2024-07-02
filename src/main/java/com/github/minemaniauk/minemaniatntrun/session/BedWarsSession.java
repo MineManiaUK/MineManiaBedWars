@@ -123,10 +123,15 @@ public class BedWarsSession extends Session<BedWarsArena> {
 
         // Teleport players to the correct area.
         this.teleportTeams();
+
+        // Put them in the correct game mode and clear there inventory.
         this.getOnlinePlayers().forEach(player -> {
             player.setGameMode(GameMode.SURVIVAL);
             player.getInventory().clear();
         });
+
+        // Give the players there default items.
+        this.giveDefaultItems();
 
         // Start the npc component.
         this.getComponent(BedWarsNPCComponent.class).start();
@@ -170,6 +175,13 @@ public class BedWarsSession extends Session<BedWarsArena> {
     public @NotNull BedWarsSession teleportTeams() {
         for (Team team : this.teamList) {
             team.teleportPlayers();
+        }
+        return this;
+    }
+
+    public @NotNull BedWarsSession giveDefaultItems() {
+        for (Team team : this.teamList) {
+            team.giveDefaultItems();
         }
         return this;
     }
