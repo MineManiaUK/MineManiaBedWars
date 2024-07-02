@@ -66,6 +66,7 @@ public class BedWarsSelectTeamComponent extends TaskContainer implements Session
                 if (this.getSession().getTeam(player.getUniqueId()).isPresent()) continue;
 
                 new SelectTeamInventory(this.getSession()).open(player);
+                player.getInventory().clear();
             }
 
             if (getCountDown().toSeconds() < 0) {
