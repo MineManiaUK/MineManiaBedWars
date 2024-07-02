@@ -26,7 +26,6 @@ import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.BedWarsUpgrade;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Material;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;

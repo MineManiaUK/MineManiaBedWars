@@ -24,7 +24,10 @@ import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
 public enum BedWarsUpgrade {
-    SHARPNESS(() -> new CozyItem("&f&lSharpness", Material.IRON_SWORD), 5) {
+    SHARPNESS(() -> new CozyItem()
+            .setMaterial(Material.IRON_SWORD)
+            .setName("&f&lIron Sword")
+            .setLore("&7Gives everyone on your team infinite sharpness!"), 5) {
         @Override
         public void onPurchase(@NotNull Team team) {
             this.setLevel(1);
