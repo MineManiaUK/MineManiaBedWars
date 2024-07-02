@@ -77,9 +77,14 @@ public class BedWarsOutOfBoundsComponent extends TaskContainer implements Sessio
 
                     final TeamPlayer teamPlayer = this.getSession().getTeamPlayer(player.getUniqueId()).orElseThrow();
 
+                    if (this.session.getStatus() == BedWarsStatus.SELECTING_TEAMS) {
+                        player.teleport(spawnPoint);
+                        continue;
+                    }
+
                     if (teamPlayer.isDead()) {
                         player.teleport(spawnPoint);
-                        return;
+                        continue;
                     }
 
                     teamPlayer.kill();

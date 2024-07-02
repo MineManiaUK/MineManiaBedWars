@@ -138,7 +138,7 @@ public class ShopInventory extends CozyInventory {
                 item.getCostMaterial().orElse(Material.IRON_INGOT),
                 item.getCostAmount().orElse(1),
                 slot,
-                () -> {}
+                runnable
         );
     }
 

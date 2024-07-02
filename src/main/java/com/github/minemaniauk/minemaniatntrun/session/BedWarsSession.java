@@ -131,6 +131,8 @@ public class BedWarsSession extends Session<BedWarsArena> {
         event.setCancelled(true);
         player.setHealth(player.getMaxHealth());
 
+        if (this.getStatus() == BedWarsStatus.SELECTING_TEAMS) return;
+
         TeamPlayer teamPlayer = this.getTeamPlayer(player.getUniqueId()).orElse(null);
         if (teamPlayer == null) return;
 
@@ -138,6 +140,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
     }
 
     public void onPlayerDeath(@NotNull TeamPlayer player) {
+        if (this.getStatus() == BedWarsStatus.SELECTING_TEAMS) return;
         Bukkit.broadcastMessage(MessageManager.parse("&7&l> &7" + player.getName() + " died."));
         if (this.shouldEnd()) this.onEnd();
     }
