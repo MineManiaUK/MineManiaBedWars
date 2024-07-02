@@ -32,6 +32,9 @@ public enum BedWarsUpgrade {
         public void onPurchase(@NotNull Team team) {
             this.setLevel(1);
             team.setUpgrade(SHARPNESS, this);
+
+            // Update team.
+            team.updateSwords();
         }
     };
 

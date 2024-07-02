@@ -52,7 +52,15 @@ public class UpgradeInventory extends CozyInventory {
     protected void onGenerate(PlayerUser user) {
         this.resetInventory();
 
-        this.setUpgradeItem(BedWarsUpgrade.SHARPNESS, 19);
+        if (this.teamPlayer.getTeam().getUpgrade(BedWarsUpgrade.SHARPNESS).getLevel() <= 0) {
+            this.setUpgradeItem(BedWarsUpgrade.SHARPNESS, 19);
+        } else {
+            this.setItem(new CozyItem()
+                    .setMaterial(Material.BLACK_STAINED_GLASS)
+                    .setName("&f&lSharpness")
+                    .setLore("&eAlready brought")
+            );
+        }
     }
 
     private void setUpgradeItem(@NotNull BedWarsUpgrade upgrade, int slot) {

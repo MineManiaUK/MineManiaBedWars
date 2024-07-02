@@ -18,11 +18,14 @@
 
 package com.github.minemaniauk.minemaniatntrun.team;
 
+import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.minemaniauk.minemaniatntrun.BedWarsUpgrade;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -187,5 +190,18 @@ public class Team {
     public void setUpgrade(BedWarsUpgrade type, BedWarsUpgrade instance) {
         this.upgradeList.removeIf(upgrade -> upgrade.name().equalsIgnoreCase(type.name()));
         this.upgradeList.add(instance);
+    }
+
+    public void updateSwords() {
+        if (!(this.getUpgrade(BedWarsUpgrade.SHARPNESS).getLevel() >= 1)) return;
+
+        for (TeamPlayer player : this.getOnlinePlayerList()) {
+            for (ItemStack item : player.getPlayer().orElseThrow().getInventory().getContents()) {
+                if (item == null) continue;
+                if (item.getType().name().contains("SWORD")) {
+                    new CozyItem(item).addEnchantment(Enchantment.DAMAGE_ALL, 2);
+                }
+            }
+        }
     }
 }

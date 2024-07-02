@@ -69,9 +69,9 @@ public class ShopInventory extends CozyInventory {
         this.setTools();
 
         // Swords.
-        this.setBuyItem(BedWarsItem.DIAMOND_SWORD, 11, () -> this.updateSwords());
-        this.setBuyItem(BedWarsItem.IRON_SWORD, 20, () -> this.updateSwords());
-        this.setBuyItem(BedWarsItem.STONE_SWORD, 29, () -> this.updateSwords());
+        this.setBuyItem(BedWarsItem.DIAMOND_SWORD, 11, () -> this.teamPlayer.getTeam().updateSwords());
+        this.setBuyItem(BedWarsItem.IRON_SWORD, 20, () -> this.teamPlayer.getTeam().updateSwords());
+        this.setBuyItem(BedWarsItem.STONE_SWORD, 29, () -> this.teamPlayer.getTeam().updateSwords());
 
         // Bows.
         this.setSimpleBuyItem(BedWarsItem.ENCHANTED_BOW, 12);
@@ -219,17 +219,6 @@ public class ShopInventory extends CozyInventory {
                 // Otherwise take the whole stack.
                 amountTaken += itemStack.getAmount();
                 itemStack.setAmount(0);
-            }
-        }
-    }
-
-    private void updateSwords() {
-
-        if (!(this.teamPlayer.getTeam().getUpgrade(BedWarsUpgrade.SHARPNESS).getLevel() >= 1)) return;
-
-        for (ItemStack item : this.teamPlayer.getPlayer().orElseThrow().getInventory().getContents()) {
-            if (item.getType().name().contains("SWORD")) {
-                new CozyItem(item).addEnchantment(Enchantment.DAMAGE_ALL, 2);
             }
         }
     }
