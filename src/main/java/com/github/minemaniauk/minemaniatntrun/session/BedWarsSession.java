@@ -197,7 +197,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
             );
         }
 
-        this.getComponent(BedWarsEndComponent.class).stop();
+        this.getComponent(BedWarsEndComponent.class).start();
     }
 
     public void endGameFully() {
