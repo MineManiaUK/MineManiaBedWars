@@ -18,6 +18,7 @@
 
 package com.github.minemaniauk.minemaniatntrun.team;
 
+import com.github.minemaniauk.minemaniatntrun.BedWarsUpgrade;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
@@ -39,11 +40,13 @@ public class Team {
 
     private final @NotNull TeamLocation location;
     private final @NotNull List<TeamPlayer> playerList;
+    private final @NotNull List<BedWarsUpgrade> upgradeList;
 
     public Team(@NotNull BedWarsSession sessionPointer, @NotNull TeamLocation location) {
         this.sessionPointer = sessionPointer;
         this.location = location;
         this.playerList = new ArrayList<>();
+        this.upgradeList = new ArrayList<>();
     }
 
     public @NotNull BedWarsSession getSession() {
@@ -172,5 +175,17 @@ public class Team {
         return !this.getPlayerList().stream()
                 .map(TeamPlayer::isDead).toList()
                 .contains(false);
+    }
+
+    public @NotNull BedWarsUpgrade getUpgrade(BedWarsUpgrade upgrade) {
+        for (BedWarsUpgrade item : this.upgradeList) {
+            if (item.name().equals(upgrade.name())) return item;
+        }
+        return upgrade.setLevel(0);
+    }
+
+    public void setUpgrade(BedWarsUpgrade type, BedWarsUpgrade instance) {
+        this.upgradeList.removeIf(upgrade -> upgrade.name().equalsIgnoreCase(type.name()));
+        this.upgradeList.add(instance);
     }
 }

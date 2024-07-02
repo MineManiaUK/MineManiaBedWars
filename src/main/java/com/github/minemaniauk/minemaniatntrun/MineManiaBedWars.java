@@ -29,6 +29,7 @@ import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.command.*;
 import com.github.minemaniauk.minemaniatntrun.configuration.ArenaConfiguration;
 import com.github.minemaniauk.minemaniatntrun.inventory.ShopInventory;
+import com.github.minemaniauk.minemaniatntrun.inventory.UpgradeInventory;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
@@ -187,6 +188,10 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
 
         if (villager.getName().contains("Shop")) {
             new ShopInventory(teamPlayer).open(event.getPlayer());
+        }
+
+        if (villager.getName().contains("Upgrades")) {
+            new UpgradeInventory(teamPlayer).open(event.getPlayer());
         }
     }
 

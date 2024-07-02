@@ -19,14 +19,18 @@
 package com.github.minemaniauk.minemaniatntrun.team.player;
 
 import com.github.cozyplugins.cozylibrary.MessageManager;
+import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.BedWarsItem;
+import com.github.minemaniauk.minemaniatntrun.BedWarsUpgrade;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -250,7 +254,11 @@ public class TeamPlayer extends TaskContainer {
 
             // Add the default wooden sword.
             BedWarsItem item = BedWarsItem.WOODEN_SWORD;
-            inventory.addItem(item.create());
+            ItemStack itemCreated = item.create();
+            if (this.getTeam().getUpgrade(BedWarsUpgrade.SHARPNESS).getLevel() >= 1) {
+                itemCreated.addEnchantment(Enchantment.DAMAGE_ALL, 2);
+            }
+            inventory.addItem(itemCreated);
 
             // Add the obtainable items that are saved.
             if (this.pickaxe != null) inventory.addItem(this.pickaxe.create());

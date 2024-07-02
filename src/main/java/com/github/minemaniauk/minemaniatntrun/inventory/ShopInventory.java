@@ -26,6 +26,7 @@ import com.github.cozyplugins.cozylibrary.inventory.action.action.ClickAction;
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.BedWarsItem;
+import com.github.minemaniauk.minemaniatntrun.BedWarsUpgrade;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -60,21 +61,17 @@ public class ShopInventory extends CozyInventory {
         this.startRegeneratingInventory(20);
     }
 
-    public ShopInventory(int size, @NotNull String title, @NotNull TeamPlayer teamPlayer) {
-        super(size, title);
-        this.teamPlayer = teamPlayer;
-    }
-
     @Override
     protected void onGenerate(PlayerUser user) {
+        this.resetInventory();
 
         // Tools.
         this.setTools();
 
         // Swords.
-        this.setSimpleBuyItem(BedWarsItem.DIAMOND_SWORD, 11);
-        this.setSimpleBuyItem(BedWarsItem.IRON_SWORD, 20);
-        this.setSimpleBuyItem(BedWarsItem.STONE_SWORD, 29);
+        this.setBuyItem(BedWarsItem.DIAMOND_SWORD, 11, () -> this.updateSwords());
+        this.setBuyItem(BedWarsItem.IRON_SWORD, 20, () -> this.updateSwords());
+        this.setBuyItem(BedWarsItem.STONE_SWORD, 29, () -> this.updateSwords());
 
         // Bows.
         this.setSimpleBuyItem(BedWarsItem.ENCHANTED_BOW, 12);
@@ -222,6 +219,17 @@ public class ShopInventory extends CozyInventory {
                 // Otherwise take the whole stack.
                 amountTaken += itemStack.getAmount();
                 itemStack.setAmount(0);
+            }
+        }
+    }
+
+    private void updateSwords() {
+
+        if (!(this.teamPlayer.getTeam().getUpgrade(BedWarsUpgrade.SHARPNESS).getLevel() >= 1)) return;
+
+        for (ItemStack item : this.teamPlayer.getPlayer().orElseThrow().getInventory().getContents()) {
+            if (item.getType().name().contains("SWORD")) {
+                new CozyItem(item).addEnchantment(Enchantment.DAMAGE_ALL, 2);
             }
         }
     }
