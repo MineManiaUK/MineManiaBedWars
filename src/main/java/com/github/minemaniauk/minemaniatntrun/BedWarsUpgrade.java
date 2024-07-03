@@ -76,6 +76,21 @@ public enum BedWarsUpgrade {
                 generator.setLevel(generator.getLevel() + 1);
             });
         }
+    },
+    ALARM(() -> new CozyItem()
+            .setMaterial(Material.TRIPWIRE_HOOK)
+            .setName("&f&lAlarm")
+            .setLore("&7Get notified when someone is at your base.")) {
+
+        @Override
+        public int getCost(int level) {
+            return 1;
+        }
+
+        @Override
+        public void onPurchase(@NotNull Team team) {
+            team.setUpgradeLevel(ALARM, team.getUpgradeLevel(ALARM) + 1);
+        }
     };
 
     private final @NotNull ItemFactory factory;

@@ -23,6 +23,7 @@ import com.github.cozyplugins.cozylibrary.CozyPlugin;
 import com.github.cozyplugins.cozylibrary.command.command.command.ProgrammableCommand;
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.location.Region3D;
+import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.game.session.SessionManager;
 import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
@@ -33,12 +34,10 @@ import com.github.minemaniauk.minemaniatntrun.inventory.ShopInventory;
 import com.github.minemaniauk.minemaniatntrun.inventory.UpgradeInventory;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsBlockInteractionsComponent;
+import com.github.minemaniauk.minemaniatntrun.team.Team;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -49,6 +48,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -224,6 +224,8 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
     public void onArmourClick(InventoryClickEvent event) {
         if (event.getCurrentItem() == null) return;
         CozyItem item = new CozyItem(event.getCurrentItem());
+        if (item.getMaterial().equals(Material.AIR)) return;
+        if (!item.hasNBT()) return;
         if (Boolean.TRUE.equals(item.getNBTBoolean("bed_wars_armour"))) {
             event.setCancelled(true);
         }
@@ -312,6 +314,43 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
             }
         };
         eggTimer.runTaskTimer(this, 1L, 1L);
+    }
+
+    @EventHandler
+    public void onEnemyInBase(PlayerMoveEvent event) {
+        Location location = event.getTo();
+        if(location == null) return;
+
+        // Check if it was in an arena.
+        final BedWarsArena arena = this.getArena(location).orElse(null);
+        if (arena == null) return;
+
+        // Check if the arena is in a session.
+        BedWarsSession session = this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
+        if (session == null) return;
+
+        // Check if it was in a team location.
+        final TeamLocation teamLocation = arena.getTeamLocation(location).orElse(null);
+        if (teamLocation == null) return;
+
+        Team team = session.getTeam(teamLocation.getColor()).orElse(null);
+        if (team == null) return;
+
+        // Check if the player is on their team.
+        if (team.getPlayerList().stream().map(TeamPlayer::getPlayerUuid).toList().contains(event.getPlayer().getUniqueId())) return;
+
+        // Check if the team has an alarm.
+        if (team.getUpgradeLevel(BedWarsUpgrade.ALARM) == 0) return;
+
+        // Use the alarm.
+        team.setUpgradeLevel(BedWarsUpgrade.ALARM, 0);
+
+        for (TeamPlayer teamPlayer : team.getPlayerList()) {
+            teamPlayer.getPlayer().ifPresent(player -> {
+                new PlayerUser(player).sendMessage("&c&lALARM > &cAn enemy team is at your base!");
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1F, 1F);
+            });
+        }
     }
 
     /**

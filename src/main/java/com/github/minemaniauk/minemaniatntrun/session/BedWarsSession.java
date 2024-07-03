@@ -36,6 +36,7 @@ import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -144,6 +145,9 @@ public class BedWarsSession extends Session<BedWarsArena> {
 
     public void onPlayerDeath(@NotNull TeamPlayer player) {
         if (this.getStatus() == BedWarsStatus.SELECTING_TEAMS) return;
+        player.getPlayer().ifPresent(presentPlayer -> {
+            presentPlayer.getWorld().spawnParticle(Particle.CLOUD, presentPlayer.getLocation(), 4);
+        });
         Bukkit.broadcastMessage(MessageManager.parse("&7&l> &7" + player.getName() + " died."));
         if (this.shouldEnd()) this.onEnd();
     }

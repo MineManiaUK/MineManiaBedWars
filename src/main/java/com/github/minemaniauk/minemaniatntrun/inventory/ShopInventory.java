@@ -113,7 +113,7 @@ public class ShopInventory extends CozyInventory {
         // Potions
         this.setSimpleBuyItem(BedWarsItem.SWIFTNESS, 16);
         this.setSimpleBuyItem(BedWarsItem.JUMP, 25);
-        this.setSimpleBuyItem(BedWarsItem.INVISIBILITY, 34);
+        // this.setSimpleBuyItem(BedWarsItem.INVISIBILITY, 34);
 
         // Golden Apple.
         this.setSimpleBuyItem(BedWarsItem.GOLDEN_APPLE, 43);

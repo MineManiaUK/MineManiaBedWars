@@ -178,7 +178,6 @@ public class TeamPlayer extends TaskContainer {
         this.getTeam().getSession().onPlayerDeath(this);
 
         this.getPlayer().ifPresent(player -> {
-            player.teleport(this.getTeam().getLocation().getSpawnPoint());
             player.setGameMode(GameMode.SPECTATOR);
         });
 

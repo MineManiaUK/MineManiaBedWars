@@ -98,6 +98,17 @@ public class UpgradeInventory extends CozyInventory {
                     .setLore("&eAlready brought max level 3")
             );
         }
+
+        if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.ALARM) <= 0) {
+            this.setUpgradeItem(BedWarsUpgrade.ALARM, 23, 1);
+        } else {
+            this.setItem(new InventoryItem()
+                    .addSlot(23)
+                    .setMaterial(Material.LIME_STAINED_GLASS_PANE)
+                    .setName("&f&lAlarm")
+                    .setLore("&eAlready brought")
+            );
+        }
     }
 
     private void setUpgradeItem(@NotNull BedWarsUpgrade upgrade, int slot, int nextLevel) {
