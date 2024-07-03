@@ -24,6 +24,7 @@ import com.github.minemaniauk.api.game.session.SessionComponent;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.generator.Generator;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
+import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -32,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents the generator component.
@@ -95,5 +97,12 @@ public class BedWarsGeneratorComponent implements SessionComponent<BedWarsArena>
         }
 
         return this;
+    }
+
+    public @NotNull Optional<Generator> getTeamGenerator(@NotNull TeamLocation location) {
+       for (Generator generator : this.generatorList) {
+           if (location.getRegion().contains(generator.getLocation())) return Optional.of(generator);
+       }
+       return Optional.empty();
     }
 }

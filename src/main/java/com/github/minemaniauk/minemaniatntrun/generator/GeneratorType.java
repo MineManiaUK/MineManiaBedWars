@@ -21,7 +21,6 @@ package com.github.minemaniauk.minemaniatntrun.generator;
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -35,45 +34,44 @@ import java.util.Arrays;
 public enum GeneratorType {
     TEAM("&f", "Team Generator") {
         @Override
-        public @NotNull GeneratorType generate(@NotNull Location location, int level) {
+        public @NotNull GeneratorType generate(@NotNull Location location, int level, int step, Runnable resetStep) {
             if (level == 1) {
-                if (this.getStep() == 8) {
+                if (step >= 8) {
                     this.generate(location, Material.GOLD_INGOT);
-                    this.setStep(-1);
+                    resetStep.run();
                 } else {
                     this.generate(location, Material.IRON_INGOT);
                 }
             }
             if (level == 2) {
-                if (this.getStep() == 4) {
+                if (step >= 4) {
                     this.generate(location, Material.GOLD_INGOT);
                     this.generate(location, Material.IRON_INGOT);
-                    this.setStep(-1);
+                    resetStep.run();
                 } else {
                     this.generate(location, Material.IRON_INGOT);
                 }
             }
             if (level == 3) {
-                if (this.getStep() == 2) {
+                if (step >= 2) {
                     this.generate(location, Material.GOLD_INGOT);
                     this.generate(location, Material.IRON_INGOT);
-                    this.setStep(-1);
+                    resetStep.run();
                 } else {
                     this.generate(location, Material.IRON_INGOT);
                 }
             }
             if (level == 4) {
-                if (this.getStep() == 20) {
+                if (step >= 20) {
                     this.generate(location, Material.EMERALD);
-                    this.setStep(-1);
-                } else if (this.getStep() == 2) {
+                    resetStep.run();
+                } else if (step % 2 == 0) {
                     this.generate(location, Material.GOLD_INGOT);
                     this.generate(location, Material.IRON_INGOT);
                 } else {
                     this.generate(location, Material.IRON_INGOT);
                 }
             }
-            this.incrementStep();
             return this;
         }
 
@@ -84,8 +82,9 @@ public enum GeneratorType {
     },
     DIAMOND("&b", "Diamond Generator") {
         @Override
-        public @NotNull GeneratorType generate(@NotNull Location location, int level) {
+        public @NotNull GeneratorType generate(@NotNull Location location, int level, int step, Runnable resetStep) {
             this.generate(location, Material.DIAMOND);
+            resetStep.run();
             return this;
         }
 
@@ -100,8 +99,9 @@ public enum GeneratorType {
     },
     EMERALD("&a", "Emerald Generator") {
         @Override
-        public @NotNull GeneratorType generate(@NotNull Location location, int level) {
+        public @NotNull GeneratorType generate(@NotNull Location location, int level, int step, Runnable resetStep) {
             this.generate(location, Material.EMERALD);
+            resetStep.run();
             return this;
         }
 
@@ -125,8 +125,6 @@ public enum GeneratorType {
      * Manually changing the step can make the
      * rate of drops more random.
      */
-    private int step;
-
     private @NotNull String colorCode;
     private @NotNull String title;
 
@@ -134,13 +132,8 @@ public enum GeneratorType {
      * Used to create a new generator type.
      */
     GeneratorType(@NotNull String colorCode, @NotNull String title) {
-        this.step = 0;
         this.colorCode = colorCode;
         this.title = title;
-    }
-
-    public int getStep() {
-        return this.step;
     }
 
     public @NotNull String getColorCode() {
@@ -151,23 +144,13 @@ public enum GeneratorType {
         return this.title;
     }
 
-    public @NotNull GeneratorType setStep(int step) {
-        this.step = step;
-        return this;
-    }
-
-    public @NotNull GeneratorType incrementStep() {
-        this.step++;
-        return this;
-    }
-
     /**
      * Used to generate the specific drops at a specific location.
      *
      * @param location The location to spawn the drops at.
      * @return This instance.
      */
-    public abstract @NotNull GeneratorType generate(@NotNull Location location, int level);
+    public abstract @NotNull GeneratorType generate(@NotNull Location location, int level, int step, Runnable resetStep);
 
     /**
      * Used to get the amount of time to wait

@@ -162,11 +162,39 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
         }
     }
 
-    public boolean onBlockExplode(Location location) {
+    public boolean checkIfPlayerCanBreakHere(Location location) {
         return this.blockLocationList.contains(location);
     }
 
     public void addBlock(Location location) {
         this.blockLocationList.add(location);
+    }
+
+    public boolean checkIfPlayerCanPlaceHere(@NotNull Location location) {
+
+        // Check if it was in a team location.
+        final TeamLocation teamLocation = this.getSession().getArena().getTeamLocation(location).orElse(null);
+
+        // Check if someone is trying to block a team's spawn.
+        if (teamLocation != null) {
+
+            final Location center = teamLocation.getRegion().getCenter().clone();
+            final Region3D tooCloseRegion = new Region3D(center, center).expand(3);
+
+            boolean blockTooClose = tooCloseRegion.contains(location);
+
+            if (blockTooClose) {
+                return false;
+            }
+        }
+
+        // Check if the block is being placed out of bounds.
+        final Region3D arenaRegion = this.getSession().getArena().getRegion().orElseThrow();
+
+        if (location.getBlockY() <= arenaRegion.getMinPoint().getBlockY()) {
+            return false;
+        }
+
+        return true;
     }
 }

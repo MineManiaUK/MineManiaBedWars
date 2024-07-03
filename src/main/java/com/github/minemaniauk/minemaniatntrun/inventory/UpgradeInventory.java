@@ -52,23 +52,60 @@ public class UpgradeInventory extends CozyInventory {
     protected void onGenerate(PlayerUser user) {
         this.resetInventory();
 
-        if (this.teamPlayer.getTeam().getUpgrade(BedWarsUpgrade.SHARPNESS).getLevel() <= 0) {
-            this.setUpgradeItem(BedWarsUpgrade.SHARPNESS, 19);
+        if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.SHARPNESS) <= 0) {
+            this.setUpgradeItem(BedWarsUpgrade.SHARPNESS, 19, 1);
         } else {
             this.setItem(new InventoryItem()
                     .addSlot(19)
-                    .setMaterial(Material.BLACK_STAINED_GLASS)
+                    .setMaterial(Material.BLACK_STAINED_GLASS_PANE)
                     .setName("&f&lSharpness")
                     .setLore("&eAlready brought")
             );
         }
+
+        if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.PROTECTION) == 0) {
+            this.setUpgradeItem(BedWarsUpgrade.PROTECTION, 20, 1);
+        }
+        else if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.PROTECTION) == 1) {
+            this.setUpgradeItem(BedWarsUpgrade.PROTECTION, 20, 2);
+        }
+        else if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.PROTECTION) == 2) {
+            this.setUpgradeItem(BedWarsUpgrade.PROTECTION, 20, 3);
+        }
+        else if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.PROTECTION) == 3) {
+            this.setItem(new InventoryItem()
+                    .addSlot(20)
+                    .setMaterial(Material.BLACK_STAINED_GLASS_PANE)
+                    .setName("&f&lProtection")
+                    .setLore("&eAlready brought max level 3")
+            );
+        }
+
+        if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.FORGE) == 0) {
+            this.setUpgradeItem(BedWarsUpgrade.FORGE, 21, 1);
+        }
+        else if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.FORGE) == 1) {
+            this.setUpgradeItem(BedWarsUpgrade.FORGE, 21, 2);
+        }
+        else if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.FORGE) == 2) {
+            this.setUpgradeItem(BedWarsUpgrade.FORGE, 21, 3);
+        }
+        else if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.FORGE) == 3) {
+            this.setItem(new InventoryItem()
+                    .addSlot(21)
+                    .setMaterial(Material.BLACK_STAINED_GLASS_PANE)
+                    .setName("&f&lTeam Generator")
+                    .setLore("&eAlready brought max level 3")
+            );
+        }
     }
 
-    private void setUpgradeItem(@NotNull BedWarsUpgrade upgrade, int slot) {
+    private void setUpgradeItem(@NotNull BedWarsUpgrade upgrade, int slot, int nextLevel) {
 
         CozyItem item = upgrade.createDisplayItem()
                 .addLore("&7")
-                .addLore("&aCost &b" + upgrade.getCost() + " diamonds");
+                .addLore("&aLevel &b" + nextLevel)
+                .addLore("&aCost &b" + upgrade.getCost(nextLevel) + " diamonds");
 
         this.setItem(new InventoryItem(item.create())
                 .addSlot(slot)
@@ -78,12 +115,12 @@ public class UpgradeInventory extends CozyInventory {
 
                     // Check if they have the correct
                     // amount of resources to buy.
-                    if (!playerInventory.containsAtLeast(new CozyItem(Material.DIAMOND).create(), upgrade.getCost())) {
+                    if (!playerInventory.containsAtLeast(new CozyItem(Material.DIAMOND).create(), upgrade.getCost(nextLevel))) {
                         user.sendMessage("&7&l> &7You do not have enough &bdiamonds &7to buy this.");
                         return;
                     }
 
-                    this.removeResources(Material.DIAMOND, upgrade.getCost(), playerInventory);
+                    this.removeResources(Material.DIAMOND, upgrade.getCost(nextLevel), playerInventory);
                     upgrade.onPurchase(this.teamPlayer.getTeam());
 
                     for (TeamPlayer item2 : this.teamPlayer.getTeam().getOnlinePlayerList()) {

@@ -156,6 +156,7 @@ public class ShopInventory extends CozyInventory {
 
                     armorType.applyArmor(this.teamPlayer);
                     this.teamPlayer.setArmourType(armorType);
+                    this.teamPlayer.getTeam().updateArmour();
 
                     user.sendMessage("&a&l> &aYou have brought &e" + type.name().toLowerCase() + " armour&a for &e" + armorType.getCostAmount() + "x &f" + armorType.getCostMaterial().name().split("_")[0].toLowerCase() + "&a.");
                 })

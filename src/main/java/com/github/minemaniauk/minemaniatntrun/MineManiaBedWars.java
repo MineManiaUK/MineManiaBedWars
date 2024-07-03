@@ -40,18 +40,13 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.type.Bed;
-import org.bukkit.block.data.type.TNT;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -250,10 +245,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
             BedWarsSession session = this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
             if (session == null) continue;
 
-            // Check if it was in a team location.
-            final TeamLocation teamLocation = arena.getTeamLocation(location).orElse(null);
-
-            boolean isPlayerBlock = session.onBlockExplode(block.getLocation());
+            boolean isPlayerBlock = session.checkIfPlayerCanBreakHere(block.getLocation());
             if (isPlayerBlock && !block.getType().equals(Material.GLASS)) block.setType(Material.AIR);
         }
     }
@@ -310,8 +302,12 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
                 locationList.add(egg.getLocation().clone().add(new Vector(0, -2, -1)));
 
                 for (Location location : locationList) {
+                    boolean canPlace = session.checkIfPlayerCanPlaceHere(location);
+                    if (!canPlace) continue;
+                    if (!location.getBlock().getType().equals(Material.AIR)) continue;
+
                     location.getBlock().setType(teamPlayer.getTeam().getLocation().getColor().getWool());
-                    session.getComponent(BedWarsBlockInteractionsComponent.class).addBlock(location);
+                    session.getComponent(BedWarsBlockInteractionsComponent.class).addBlock(location.getBlock().getLocation());
                 }
             }
         };

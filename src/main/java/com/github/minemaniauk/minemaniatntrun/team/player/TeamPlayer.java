@@ -260,7 +260,7 @@ public class TeamPlayer extends TaskContainer {
             // Add the default wooden sword.
             BedWarsItem item = BedWarsItem.WOODEN_SWORD;
             ItemStack itemCreated = item.create();
-            if (this.getTeam().getUpgrade(BedWarsUpgrade.SHARPNESS).getLevel() >= 1) {
+            if (this.getTeam().getUpgradeLevel(BedWarsUpgrade.SHARPNESS) >= 1) {
                 itemCreated.addEnchantment(Enchantment.DAMAGE_ALL, 2);
             }
             inventory.addItem(itemCreated);
@@ -272,6 +272,7 @@ public class TeamPlayer extends TaskContainer {
 
             // Set armour.
             this.armourType.applyArmor(this);
+            this.getTeam().updateArmour();
         });
 
         return this;

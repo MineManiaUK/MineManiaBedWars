@@ -26,26 +26,62 @@ import org.jetbrains.annotations.NotNull;
 public enum BedWarsUpgrade {
     SHARPNESS(() -> new CozyItem()
             .setMaterial(Material.IRON_SWORD)
-            .setName("&f&lIron Sword")
-            .setLore("&7Gives everyone on your team infinite sharpness!"), 5) {
+            .setName("&f&lSharpness")
+            .setLore("&7Gives everyone on your team infinite sharpness!")) {
+
+        @Override
+        public int getCost(int level) {
+            return 5;
+        }
+
         @Override
         public void onPurchase(@NotNull Team team) {
-            this.setLevel(1);
-            team.setUpgrade(SHARPNESS, this);
+            team.setUpgradeLevel(SHARPNESS, team.getUpgradeLevel(SHARPNESS) + 1);
 
             // Update team.
             team.updateSwords();
         }
+    },
+    PROTECTION(() -> new CozyItem()
+            .setMaterial(Material.IRON_CHESTPLATE)
+            .setName("&f&lProtection")
+            .setLore("&7Gives everyone on your team armour protection.")) {
+        @Override
+        public int getCost(int level) {
+            return level * 5;
+        }
+
+        @Override
+        public void onPurchase(@NotNull Team team) {
+            team.setUpgradeLevel(PROTECTION, team.getUpgradeLevel(PROTECTION) + 1);
+
+            // Update team.
+            team.updateArmour();
+        }
+    },
+    FORGE(() -> new CozyItem()
+            .setMaterial(Material.FURNACE)
+            .setName("&f&lTeam Generator")
+            .setLore("&7Upgrades your teams generator.")) {
+        @Override
+        public int getCost(int level) {
+            return level * 4;
+        }
+
+        @Override
+        public void onPurchase(@NotNull Team team) {
+            team.setUpgradeLevel(FORGE, team.getUpgradeLevel(FORGE) + 1);
+
+            team.getGenerator().ifPresent(generator -> {
+                generator.setLevel(generator.getLevel() + 1);
+            });
+        }
     };
 
     private final @NotNull ItemFactory factory;
-    private final int cost;
-    private int level;
 
-    BedWarsUpgrade(@NotNull ItemFactory factory, int cost) {
+    BedWarsUpgrade(@NotNull ItemFactory factory) {
         this.factory = factory;
-        this.cost = cost;
-        this.level = 0;
     }
 
     public interface ItemFactory {
@@ -54,22 +90,11 @@ public enum BedWarsUpgrade {
 
     }
 
+    public abstract int getCost(int level);
+
     public abstract void onPurchase(@NotNull Team team);
 
     public @NotNull CozyItem createDisplayItem() {
         return factory.create();
-    }
-
-    public int getCost() {
-        return cost;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public BedWarsUpgrade setLevel(int level) {
-        this.level = level;
-        return this;
     }
 }

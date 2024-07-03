@@ -28,7 +28,6 @@ import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArenaFactory;
-import com.github.minemaniauk.minemaniatntrun.generator.Generator;
 import com.github.minemaniauk.minemaniatntrun.session.component.*;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
@@ -37,17 +36,10 @@ import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -124,8 +116,12 @@ public class BedWarsSession extends Session<BedWarsArena> {
         this.getComponent(BedWarsBlockInteractionsComponent.class).onBlockPlace(event, teamLocation);
     }
 
-    public boolean onBlockExplode(Location location) {
-        return this.getComponent(BedWarsBlockInteractionsComponent.class).onBlockExplode(location);
+    public boolean checkIfPlayerCanBreakHere(Location location) {
+        return this.getComponent(BedWarsBlockInteractionsComponent.class).checkIfPlayerCanBreakHere(location);
+    }
+
+    public boolean checkIfPlayerCanPlaceHere(Location location) {
+        return this.getComponent(BedWarsBlockInteractionsComponent.class).checkIfPlayerCanPlaceHere(location);
     }
 
     public void onPlayerDeath(@NotNull EntityDamageEvent event) {

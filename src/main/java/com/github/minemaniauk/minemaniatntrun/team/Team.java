@@ -20,7 +20,9 @@ package com.github.minemaniauk.minemaniatntrun.team;
 
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.minemaniauk.minemaniatntrun.BedWarsUpgrade;
+import com.github.minemaniauk.minemaniatntrun.generator.Generator;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
+import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsGeneratorComponent;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
@@ -28,10 +30,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -43,13 +42,13 @@ public class Team {
 
     private final @NotNull TeamLocation location;
     private final @NotNull List<TeamPlayer> playerList;
-    private final @NotNull List<BedWarsUpgrade> upgradeList;
+    private final @NotNull Map<BedWarsUpgrade, Integer> upgradeMap;
 
     public Team(@NotNull BedWarsSession sessionPointer, @NotNull TeamLocation location) {
         this.sessionPointer = sessionPointer;
         this.location = location;
         this.playerList = new ArrayList<>();
-        this.upgradeList = new ArrayList<>();
+        this.upgradeMap = new HashMap<>();
     }
 
     public @NotNull BedWarsSession getSession() {
@@ -64,6 +63,10 @@ public class Team {
      */
     public @NotNull TeamLocation getLocation() {
         return this.location;
+    }
+
+    public @NotNull Optional<Generator> getGenerator() {
+        return this.sessionPointer.getComponent(BedWarsGeneratorComponent.class).getTeamGenerator(this.getLocation());
     }
 
     /**
@@ -180,20 +183,19 @@ public class Team {
                 .contains(false);
     }
 
-    public @NotNull BedWarsUpgrade getUpgrade(BedWarsUpgrade upgrade) {
-        for (BedWarsUpgrade item : this.upgradeList) {
-            if (item.name().equals(upgrade.name())) return item;
+    public int getUpgradeLevel(BedWarsUpgrade upgrade) {
+        for (Map.Entry<BedWarsUpgrade, Integer> entry : this.upgradeMap.entrySet()) {
+            if (entry.getKey().name().equals(upgrade.name())) return entry.getValue();
         }
-        return upgrade.setLevel(0);
+        return 0;
     }
 
-    public void setUpgrade(BedWarsUpgrade type, BedWarsUpgrade instance) {
-        this.upgradeList.removeIf(upgrade -> upgrade.name().equalsIgnoreCase(type.name()));
-        this.upgradeList.add(instance);
+    public void setUpgradeLevel(BedWarsUpgrade type, int level) {
+        this.upgradeMap.put(type, level);
     }
 
     public void updateSwords() {
-        if (!(this.getUpgrade(BedWarsUpgrade.SHARPNESS).getLevel() >= 1)) return;
+        if (!(this.getUpgradeLevel(BedWarsUpgrade.SHARPNESS) >= 1)) return;
 
         for (TeamPlayer player : this.getOnlinePlayerList()) {
             for (ItemStack item : player.getPlayer().orElseThrow().getInventory().getContents()) {
@@ -201,6 +203,28 @@ public class Team {
                 if (item.getType().name().contains("SWORD")) {
                     new CozyItem(item).addEnchantment(Enchantment.DAMAGE_ALL, 2);
                 }
+            }
+        }
+    }
+
+    public void updateArmour() {
+        int protectionLevel = this.getUpgradeLevel(BedWarsUpgrade.PROTECTION);
+
+        if (protectionLevel == 0) return;
+
+        for (TeamPlayer teamPlayer : this.getOnlinePlayerList()) {
+            Player player = teamPlayer.getPlayer().orElseThrow();
+            if (player.getInventory().getHelmet() != null) {
+                new CozyItem(player.getInventory().getHelmet()).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
+            }
+            if (player.getInventory().getChestplate() != null) {
+                new CozyItem(player.getInventory().getChestplate()).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
+            }
+            if (player.getInventory().getLeggings() != null) {
+                new CozyItem(player.getInventory().getLeggings()).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
+            }
+            if (player.getInventory().getBoots() != null) {
+                new CozyItem(player.getInventory().getBoots()).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
             }
         }
     }

@@ -38,6 +38,7 @@ public class Generator extends TaskContainer {
 
     private final @NotNull GeneratorLocation location;
 
+    private int step;
     private int level;
     private long lastDropTimeStamp;
     private @NotNull String hologramIdentifier;
@@ -83,8 +84,7 @@ public class Generator extends TaskContainer {
             DHAPI.setHologramLine(hologram, 1,
                     "&7Spawning in " + this.getType().getColorCode()
                             + this.getTimeTillNextDrop().getSeconds() + "s"
-                            + " &7(&f1/" + this.getType().getCooldown(this.level).getSeconds()
-                            + "s&7)"
+                            + " [level&f" + this.getLevel() + "&7]"
             );
 
         }, 10);
@@ -111,7 +111,8 @@ public class Generator extends TaskContainer {
     public @NotNull Generator generate() {
 
         // Generate the first type at the location.
-        this.getType().generate(this.getLocation(), this.level);
+        this.getType().generate(this.getLocation(), this.level, this.step, () -> this.step = 0);
+        this.step++;
 
         // Set the last drop time stamp.
         this.lastDropTimeStamp = System.currentTimeMillis();

@@ -33,7 +33,7 @@ import java.time.Duration;
 public class BedWarsSelectTeamComponent extends TaskContainer implements SessionComponent<BedWarsArena> {
 
     private static final @NotNull String SELECT_TEAMS_IDENTIFIER = "SELECT_TEAMS_IDENTIFIER";
-    private static final Duration toWait = Duration.ofSeconds(40);
+    private static final Duration toWait = Duration.ofSeconds(30);
 
     private final @NotNull BedWarsSession session;
     private long startTimeStamp;
