@@ -29,21 +29,23 @@ import org.jetbrains.annotations.NotNull;
  * exist in a bed wars game.
  */
 public enum ArmorType {
-    NONE(0, "No Armor") {
+    NONE(0, "No Armor", Material.IRON_INGOT, 0, () -> new CozyItem().setMaterial(Material.AIR)) {
         @Override
         public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
             this.applyBasicArmour(teamPlayer);
             return teamPlayer;
         }
     },
-    LEATHER(1, "Leather Armor") {
+    LEATHER(1, "Leather Armor", Material.IRON_INGOT, 20, () -> new CozyItem()
+            .setMaterial(Material.LEATHER_CHESTPLATE)
+            .setName("&f&lLeather Boots and Leggings")) {
         @Override
         public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
             Color color = teamPlayer.getTeam().getLocation().getColor().getBukkitColor();
 
             teamPlayer.getPlayer().ifPresent(player -> {
                 player.getInventory().setBoots(this.setColor(new CozyItem().setMaterial(Material.LEATHER_BOOTS), color)
-                        .setName("&7&lLeather Boots")
+                        .setName("&f&lLeather Boots")
                         .setLore("&7Armour will not disappear when you die.",
                                 "&7",
                                 "&7- You can purchase better armour in the shop.",
@@ -53,7 +55,7 @@ public enum ArmorType {
                 );
 
                 player.getInventory().setLeggings(this.setColor(new CozyItem().setMaterial(Material.LEATHER_LEGGINGS), color)
-                        .setName("&7&lLeather Leggings")
+                        .setName("&f&lLeather Leggings")
                         .setLore("&7Armour will not disappear when you die.",
                                 "&7",
                                 "&7- You can purchase better armour in the shop.",
@@ -65,13 +67,15 @@ public enum ArmorType {
             return teamPlayer;
         }
     },
-    IRON(2, "Iron Armor") {
+    IRON(2, "Iron Armor", Material.GOLD_INGOT, 12, () -> new CozyItem()
+            .setMaterial(Material.IRON_CHESTPLATE)
+            .setName("&6&lIron Boots and Leggings")) {
         @Override
         public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
             teamPlayer.getPlayer().ifPresent(player -> {
                 player.getInventory().setBoots(new CozyItem()
                         .setMaterial(Material.IRON_BOOTS)
-                        .setName("&7&lIron Boots")
+                        .setName("&6&lIron Boots")
                         .setLore("&7Armour will not disappear when you die.",
                                 "&7",
                                 "&7- You can purchase better armour in the shop.",
@@ -82,7 +86,7 @@ public enum ArmorType {
 
                 player.getInventory().setLeggings(new CozyItem()
                         .setMaterial(Material.IRON_LEGGINGS)
-                        .setName("&7&lIron Leggings")
+                        .setName("&6&lIron Leggings")
                         .setLore("&7Armour will not disappear when you die.",
                                 "&7",
                                 "&7- You can purchase better armour in the shop.",
@@ -94,13 +98,15 @@ public enum ArmorType {
             return teamPlayer;
         }
     },
-    DIAMOND(3, "Diamond Armor") {
+    DIAMOND(3, "Diamond Armor", Material.EMERALD, 6, () -> new CozyItem()
+            .setMaterial(Material.DIAMOND_CHESTPLATE)
+            .setName("&a&lDiamond Boots and Leggings")) {
         @Override
         public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
             teamPlayer.getPlayer().ifPresent(player -> {
                 player.getInventory().setBoots(new CozyItem()
                         .setMaterial(Material.DIAMOND_BOOTS)
-                        .setName("&7&lDiamond Boots")
+                        .setName("&a&lDiamond Boots")
                         .setLore("&7Armour will not disappear when you die.",
                                 "&7",
                                 "&7- You can enchant your teams armour by clicking",
@@ -110,7 +116,7 @@ public enum ArmorType {
 
                 player.getInventory().setLeggings(new CozyItem()
                         .setMaterial(Material.DIAMOND_LEGGINGS)
-                        .setName("&7&lDiamond Leggings")
+                        .setName("&a&lDiamond Leggings")
                         .setLore("&7Armour will not disappear when you die.",
                                 "&7",
                                 "&7- You can enchant your teams armour by clicking",
@@ -124,6 +130,9 @@ public enum ArmorType {
 
     private final int index;
     private final @NotNull String title;
+    private final @NotNull Material costMaterial;
+    private final int costAmount;
+    private final @NotNull DisplayItemFactory factory;
 
     /**
      * Used to create a new armor type.
@@ -132,9 +141,16 @@ public enum ArmorType {
      *              The higher the number the better.
      * @param title The title of the armor used in the shop.
      */
-    ArmorType(int index, @NotNull String title) {
+    ArmorType(int index, @NotNull String title, @NotNull Material costMaterial, int costAmount, @NotNull DisplayItemFactory factory) {
         this.index = index;
         this.title = title;
+        this.costMaterial = costMaterial;
+        this.costAmount = costAmount;
+        this.factory = factory;
+    }
+
+    public interface DisplayItemFactory {
+        @NotNull CozyItem create();
     }
 
     public abstract @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer);
@@ -191,6 +207,18 @@ public enum ArmorType {
      */
     public @NotNull String getTitle() {
         return title;
+    }
+
+    public @NotNull Material getCostMaterial() {
+        return costMaterial;
+    }
+
+    public int getCostAmount() {
+        return costAmount;
+    }
+
+    public @NotNull DisplayItemFactory getFactory() {
+        return factory;
     }
 
     /**

@@ -27,6 +27,7 @@ import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.BedWarsItem;
 import com.github.minemaniauk.minemaniatntrun.BedWarsUpgrade;
+import com.github.minemaniauk.minemaniatntrun.team.player.ArmorType;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -67,6 +68,11 @@ public class ShopInventory extends CozyInventory {
 
         // Tools.
         this.setTools();
+
+        // Armour.
+        this.setArmour(ArmorType.DIAMOND, 10);
+        this.setArmour(ArmorType.IRON, 19);
+        this.setArmour(ArmorType.LEATHER, 28);
 
         // Swords.
         this.setBuyItem(BedWarsItem.DIAMOND_SWORD, 11, () -> this.teamPlayer.getTeam().updateSwords());
@@ -124,6 +130,37 @@ public class ShopInventory extends CozyInventory {
         if (!this.teamPlayer.hasShears()) this.setBuyItem(BedWarsItem.SHEARS, 39, () -> {
             this.teamPlayer.setShears(BedWarsItem.SHEARS);
         });
+    }
+
+    public void setArmour(@NotNull ArmorType armorType, int slot) {
+
+        this.setItem(new InventoryItem(armorType.getFactory().create().create())
+                .setLore("&7This item will not disappear when you die.",
+                        "&7",
+                        "&fCost &e" + armorType.getCostAmount() + "x &a" + armorType.getCostMaterial().name().split("_")[0].toLowerCase(),
+                        "&7",
+                        "&7Click to buy " + armorType.name().toLowerCase() + " armour")
+                .addSlot(slot)
+                .addAction((ClickAction) (user, type, inventory) -> {
+
+                    final Inventory playerInventory = user.getPlayer().getInventory();
+
+                    // Check if they have the correct
+                    // amount of resources to buy.
+                    if (!playerInventory.containsAtLeast(new CozyItem(armorType.getCostMaterial()).create(), armorType.getCostAmount())) {
+                        user.sendMessage("&7&l> &7You do not have enough &f" + armorType.getCostMaterial().name().split("_")[0].toLowerCase() + " &7to buy this.");
+                        return;
+                    }
+
+                    this.removeResources(armorType.getCostMaterial(), armorType.getCostAmount(), playerInventory);
+
+                    armorType.applyArmor(this.teamPlayer);
+                    this.teamPlayer.setArmourType(armorType);
+
+                    user.sendMessage("&a&l> &aYou have brought &e" + type.name().toLowerCase() + " armour&a for &e" + armorType.getCostAmount() + "x &f" + armorType.getCostMaterial().name().split("_")[0].toLowerCase() + "&a.");
+                })
+        );
+
     }
 
     public void setSimpleBuyItem(@NotNull BedWarsItem item, int slot) {

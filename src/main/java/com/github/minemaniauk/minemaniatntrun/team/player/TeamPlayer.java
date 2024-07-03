@@ -123,6 +123,11 @@ public class TeamPlayer extends TaskContainer {
         return this.armourType;
     }
 
+    public @NotNull TeamPlayer setArmourType(@NotNull ArmorType armourType) {
+        this.armourType = armourType;
+        return this;
+    }
+
     public boolean hasPickaxe() {
         return this.pickaxe != null;
     }
@@ -264,6 +269,9 @@ public class TeamPlayer extends TaskContainer {
             if (this.pickaxe != null) inventory.addItem(this.pickaxe.create());
             if (this.axe != null) inventory.addItem(this.axe.create());
             if (this.shears != null) inventory.addItem(this.shears.create());
+
+            // Set armour.
+            this.armourType.applyArmor(this);
         });
 
         return this;
