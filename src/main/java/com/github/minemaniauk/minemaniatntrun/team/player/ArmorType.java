@@ -19,7 +19,9 @@
 package com.github.minemaniauk.minemaniatntrun.team.player;
 
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
-import org.bukkit.entity.Player;
+import org.bukkit.Color;
+import org.bukkit.Material;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -29,27 +31,94 @@ import org.jetbrains.annotations.NotNull;
 public enum ArmorType {
     NONE(0, "No Armor") {
         @Override
-        public @NotNull Player applyArmor(@NotNull Player player) {
-            return player;
+        public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
+            this.applyBasicArmour(teamPlayer);
+            return teamPlayer;
         }
     },
     LEATHER(1, "Leather Armor") {
         @Override
-        public @NotNull Player applyArmor(@NotNull Player player) {
-            player.getInventory().setBoots(new CozyItem()
-                    .setName("&7&lLeather Boots")
-                    .setLore("&7Open the shop and click the armor",
-                            "&7upgrades to upgrade your armor.")
-                    .create()
-            );
+        public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
+            Color color = teamPlayer.getTeam().getLocation().getColor().getBukkitColor();
 
-            player.getInventory().setLeggings(new CozyItem()
-                    .setName("&7&lLeather Leggings")
-                    .setLore("&7Open the shop and click the armor",
-                            "&7upgrades to upgrade your armor.")
-                    .create()
-            );
-            return player;
+            teamPlayer.getPlayer().ifPresent(player -> {
+                player.getInventory().setBoots(this.setColor(new CozyItem().setMaterial(Material.LEATHER_BOOTS), color)
+                        .setName("&7&lLeather Boots")
+                        .setLore("&7Armour will not disappear when you die.",
+                                "&7",
+                                "&7- You can purchase better armour in the shop.",
+                                "&7- You can enchant your teams armour by clicking",
+                                "&7  the upgrades villager")
+                        .create()
+                );
+
+                player.getInventory().setLeggings(this.setColor(new CozyItem().setMaterial(Material.LEATHER_LEGGINGS), color)
+                        .setName("&7&lLeather Leggings")
+                        .setLore("&7Armour will not disappear when you die.",
+                                "&7",
+                                "&7- You can purchase better armour in the shop.",
+                                "&7- You can enchant your teams armour by clicking",
+                                "&7  the upgrades villager")
+                        .create()
+                );
+            });
+            return teamPlayer;
+        }
+    },
+    IRON(2, "Iron Armor") {
+        @Override
+        public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
+            teamPlayer.getPlayer().ifPresent(player -> {
+                player.getInventory().setBoots(new CozyItem()
+                        .setMaterial(Material.IRON_BOOTS)
+                        .setName("&7&lIron Boots")
+                        .setLore("&7Armour will not disappear when you die.",
+                                "&7",
+                                "&7- You can purchase better armour in the shop.",
+                                "&7- You can enchant your teams armour by clicking",
+                                "&7  the upgrades villager")
+                        .create()
+                );
+
+                player.getInventory().setLeggings(new CozyItem()
+                        .setMaterial(Material.IRON_LEGGINGS)
+                        .setName("&7&lIron Leggings")
+                        .setLore("&7Armour will not disappear when you die.",
+                                "&7",
+                                "&7- You can purchase better armour in the shop.",
+                                "&7- You can enchant your teams armour by clicking",
+                                "&7  the upgrades villager")
+                        .create()
+                );
+            });
+            return teamPlayer;
+        }
+    },
+    DIAMOND(3, "Diamond Armor") {
+        @Override
+        public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
+            teamPlayer.getPlayer().ifPresent(player -> {
+                player.getInventory().setBoots(new CozyItem()
+                        .setMaterial(Material.DIAMOND_BOOTS)
+                        .setName("&7&lDiamond Boots")
+                        .setLore("&7Armour will not disappear when you die.",
+                                "&7",
+                                "&7- You can enchant your teams armour by clicking",
+                                "&7  the upgrades villager")
+                        .create()
+                );
+
+                player.getInventory().setLeggings(new CozyItem()
+                        .setMaterial(Material.DIAMOND_LEGGINGS)
+                        .setName("&7&lDiamond Leggings")
+                        .setLore("&7Armour will not disappear when you die.",
+                                "&7",
+                                "&7- You can enchant your teams armour by clicking",
+                                "&7  the upgrades villager")
+                        .create()
+                );
+            });
+            return teamPlayer;
         }
     };
 
@@ -68,7 +137,39 @@ public enum ArmorType {
         this.title = title;
     }
 
-    public abstract @NotNull Player applyArmor(@NotNull Player player);
+    public abstract @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer);
+
+    public void applyBasicArmour(@NotNull TeamPlayer teamPlayer) {
+        Color color = teamPlayer.getTeam().getLocation().getColor().getBukkitColor();
+
+        teamPlayer.getPlayer().ifPresent(player -> {
+            player.getInventory().setHelmet(this.setColor(new CozyItem().setMaterial(Material.LEATHER_HELMET), color)
+                    .setName("&7&lLeather Helmet")
+                    .setLore("&7Armour will not disappear when you die.",
+                            "&7",
+                            "&7- You can purchase better armour in the shop.",
+                            "&7- You can enchant your teams armour by clicking",
+                            "&7  the upgrades villager")
+                    .create()
+            );
+            player.getInventory().setHelmet(this.setColor(new CozyItem().setMaterial(Material.LEATHER_CHESTPLATE), color)
+                    .setName("&7&lLeather Chestplate")
+                    .setLore("&7Armour will not disappear when you die.",
+                            "&7",
+                            "&7- You can purchase better armour in the shop.",
+                            "&7- You can enchant your teams armour by clicking",
+                            "&7  the upgrades villager")
+                    .create()
+            );
+        });
+    }
+
+    protected @NotNull CozyItem setColor(@NotNull CozyItem item, @NotNull Color color) {
+        if (!(item.getItemMeta() instanceof LeatherArmorMeta meta)) return item;
+        meta.setColor(color);
+        item.setItemMeta(meta);
+        return item;
+    }
 
     /**
      * Used to get the armor index.

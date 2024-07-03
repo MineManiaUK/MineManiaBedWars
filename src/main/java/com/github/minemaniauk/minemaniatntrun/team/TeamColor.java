@@ -18,6 +18,7 @@
 
 package com.github.minemaniauk.minemaniatntrun.team;
 
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,19 +26,20 @@ import org.jetbrains.annotations.NotNull;
  * Represents the available team colors.
  */
 public enum TeamColor {
-    RED("Red", "&c", Material.RED_BED, Material.RED_WOOL),
-    ORANGE("Orange", "&6", Material.ORANGE_BED, Material.ORANGE_WOOL),
-    YELLOW("Yellow", "&e", Material.YELLOW_BED, Material.YELLOW_WOOL),
-    GREEN("Green", "&a", Material.LIME_BED, Material.LIME_WOOL),
-    BLUE("Blue", "&b", Material.LIGHT_BLUE_BED, Material.LIGHT_BLUE_WOOL),
-    PINK("Pink", "&d", Material.PINK_BED, Material.PINK_WOOL),
-    WHITE("White", "&f", Material.WHITE_BED, Material.WHITE_WOOL),
-    GRAY("Gray", "&7", Material.GRAY_BED, Material.GRAY_WOOL);
+    RED("Red", "&c", Material.RED_BED, Material.RED_WOOL, Color.RED),
+    ORANGE("Orange", "&6", Material.ORANGE_BED, Material.ORANGE_WOOL, Color.ORANGE),
+    YELLOW("Yellow", "&e", Material.YELLOW_BED, Material.YELLOW_WOOL, Color.YELLOW),
+    GREEN("Green", "&a", Material.LIME_BED, Material.LIME_WOOL, Color.GREEN),
+    BLUE("Blue", "&b", Material.LIGHT_BLUE_BED, Material.LIGHT_BLUE_WOOL, Color.BLUE),
+    PINK("Pink", "&d", Material.PINK_BED, Material.PINK_WOOL, Color.PURPLE),
+    WHITE("White", "&f", Material.WHITE_BED, Material.WHITE_WOOL, Color.WHITE),
+    GRAY("Gray", "&7", Material.GRAY_BED, Material.GRAY_WOOL, Color.GRAY);
 
     private final @NotNull String title;
     private final @NotNull String colorCode;
     private final @NotNull Material bed;
     private final @NotNull Material wool;
+    private final @NotNull Color bukkitColor;
 
     /**
      * Used to create a new team color.
@@ -46,11 +48,12 @@ public enum TeamColor {
      * @param colorCode The color code to use.
      * @param bed The material of the color teams bed.
      */
-    TeamColor(@NotNull String title, @NotNull String colorCode, @NotNull Material bed, @NotNull Material wool) {
+    TeamColor(@NotNull String title, @NotNull String colorCode, @NotNull Material bed, @NotNull Material wool, @NotNull Color bukkitColor) {
         this.title = title;
         this.colorCode = colorCode;
         this.bed = bed;
         this.wool = wool;
+        this.bukkitColor = bukkitColor;
     }
 
     public @NotNull String getTitle() {
@@ -71,5 +74,9 @@ public enum TeamColor {
 
     public @NotNull Material getWool() {
          return this.wool;
+    }
+
+    public @NotNull Color getBukkitColor() {
+        return this.bukkitColor;
     }
 }
