@@ -28,10 +28,14 @@ import com.github.minemaniauk.minemaniatntrun.team.Team;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -151,5 +155,18 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
 
         // Log the block's location.
         this.blockLocationList.add(event.getBlock().getLocation());
+
+        if (event.getBlock().getType().equals(Material.TNT)) {
+            event.getBlockPlaced().setType(Material.AIR);
+            event.getPlayer().getWorld().spawn(event.getBlock().getLocation(), TNTPrimed.class);
+        }
+    }
+
+    public boolean onBlockExplode(Location location) {
+        return this.blockLocationList.contains(location);
+    }
+
+    public void addBlock(Location location) {
+        this.blockLocationList.add(location);
     }
 }

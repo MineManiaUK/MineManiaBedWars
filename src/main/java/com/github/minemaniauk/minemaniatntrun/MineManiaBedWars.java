@@ -21,6 +21,7 @@ package com.github.minemaniauk.minemaniatntrun;
 
 import com.github.cozyplugins.cozylibrary.CozyPlugin;
 import com.github.cozyplugins.cozylibrary.command.command.command.ProgrammableCommand;
+import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.location.Region3D;
 import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.game.session.SessionManager;
@@ -31,24 +32,35 @@ import com.github.minemaniauk.minemaniatntrun.configuration.ArenaConfiguration;
 import com.github.minemaniauk.minemaniatntrun.inventory.ShopInventory;
 import com.github.minemaniauk.minemaniatntrun.inventory.UpgradeInventory;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
+import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsBlockInteractionsComponent;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Bed;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
+import org.bukkit.block.data.type.TNT;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityInteractEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -211,6 +223,99 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         if (session == null) return;
 
         session.onPlayerDeath(event);
+    }
+
+    @EventHandler
+    public void onArmourClick(InventoryClickEvent event) {
+        if (event.getCurrentItem() == null) return;
+        CozyItem item = new CozyItem(event.getCurrentItem());
+        if (Boolean.TRUE.equals(item.getNBTBoolean("bed_wars_armour"))) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onTntExplode(EntityExplodeEvent event) {
+        event.setCancelled(true);
+
+        for (Block block : event.blockList()) {
+
+            final Location location = block.getLocation();
+
+            // Check if it was in an arena.
+            final BedWarsArena arena = this.getArena(location).orElse(null);
+            if (arena == null) continue;
+
+            // Check if the arena is in a session.
+            BedWarsSession session = this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
+            if (session == null) continue;
+
+            // Check if it was in a team location.
+            final TeamLocation teamLocation = arena.getTeamLocation(location).orElse(null);
+
+            boolean isPlayerBlock = session.onBlockExplode(block.getLocation());
+            if (isPlayerBlock && !block.getType().equals(Material.GLASS)) block.setType(Material.AIR);
+        }
+    }
+
+    @EventHandler
+    public void onFireBall(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        ItemStack item = event.getItem();
+        if (item == null) return;
+        if (!item.getType().equals(Material.FIRE_CHARGE)) return;
+
+        // Remove 1 fire charge.
+        item.setAmount(item.getAmount() - 1);
+
+        final Vector direction = player.getEyeLocation().getDirection().multiply(1);
+
+        World world = player.getWorld();
+        Fireball fireball = world.spawn(player.getEyeLocation(), Fireball.class);
+        fireball.setShooter(player);
+        fireball.setVelocity(direction);
+    }
+
+    @EventHandler
+    public void eggBridge(ProjectileLaunchEvent event) {
+        Projectile projectile = event.getEntity();
+
+        if (!(projectile instanceof Egg egg)) return;
+
+        // Start timer
+        BukkitRunnable eggTimer = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if(egg.isDead() || egg.getLocation().getY() < 80) {
+                    this.cancel();
+                    return;
+                }
+
+                // Check if it was in an arena.
+                final BedWarsArena arena = MineManiaBedWars.this.getArena(egg.getLocation()).orElse(null);
+                if (arena == null) return;
+
+                // Check if the arena is in a session.
+                BedWarsSession session = MineManiaBedWars.this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
+                if (session == null) return;
+
+                TeamPlayer teamPlayer = session.getTeamPlayer(((Player) egg.getShooter()).getUniqueId()).orElse(null);
+                if (teamPlayer == null) return;
+
+                List<Location> locationList = new ArrayList<>();
+                locationList.add(egg.getLocation().clone().add(new Vector(0, -2, 0)));
+                locationList.add(egg.getLocation().clone().add(new Vector(1, -2, 0)));
+                locationList.add(egg.getLocation().clone().add(new Vector(-1, -2, 0)));
+                locationList.add(egg.getLocation().clone().add(new Vector(0, -2, 1)));
+                locationList.add(egg.getLocation().clone().add(new Vector(0, -2, -1)));
+
+                for (Location location : locationList) {
+                    location.getBlock().setType(teamPlayer.getTeam().getLocation().getColor().getWool());
+                    session.getComponent(BedWarsBlockInteractionsComponent.class).addBlock(location);
+                }
+            }
+        };
+        eggTimer.runTaskTimer(this, 1L, 1L);
     }
 
     /**

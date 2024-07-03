@@ -41,6 +41,7 @@ public enum ArmorType {
             .setName("&f&lLeather Boots and Leggings")) {
         @Override
         public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
+            this.applyBasicArmour(teamPlayer);
             Color color = teamPlayer.getTeam().getLocation().getColor().getBukkitColor();
 
             teamPlayer.getPlayer().ifPresent(player -> {
@@ -51,6 +52,7 @@ public enum ArmorType {
                                 "&7- You can purchase better armour in the shop.",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
+                        .setNBT("bed_wars_armour", true)
                         .create()
                 );
 
@@ -61,6 +63,7 @@ public enum ArmorType {
                                 "&7- You can purchase better armour in the shop.",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
+                        .setNBT("bed_wars_armour", true)
                         .create()
                 );
             });
@@ -72,6 +75,7 @@ public enum ArmorType {
             .setName("&6&lIron Boots and Leggings")) {
         @Override
         public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
+            this.applyBasicArmour(teamPlayer);
             teamPlayer.getPlayer().ifPresent(player -> {
                 player.getInventory().setBoots(new CozyItem()
                         .setMaterial(Material.IRON_BOOTS)
@@ -81,6 +85,7 @@ public enum ArmorType {
                                 "&7- You can purchase better armour in the shop.",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
+                        .setNBT("bed_wars_armour", true)
                         .create()
                 );
 
@@ -92,6 +97,7 @@ public enum ArmorType {
                                 "&7- You can purchase better armour in the shop.",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
+                        .setNBT("bed_wars_armour", true)
                         .create()
                 );
             });
@@ -103,6 +109,7 @@ public enum ArmorType {
             .setName("&a&lDiamond Boots and Leggings")) {
         @Override
         public @NotNull TeamPlayer applyArmor(@NotNull TeamPlayer teamPlayer) {
+            this.applyBasicArmour(teamPlayer);
             teamPlayer.getPlayer().ifPresent(player -> {
                 player.getInventory().setBoots(new CozyItem()
                         .setMaterial(Material.DIAMOND_BOOTS)
@@ -111,6 +118,7 @@ public enum ArmorType {
                                 "&7",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
+                        .setNBT("bed_wars_armour", true)
                         .create()
                 );
 
@@ -121,6 +129,7 @@ public enum ArmorType {
                                 "&7",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
+                        .setNBT("bed_wars_armour", true)
                         .create()
                 );
             });
@@ -166,15 +175,17 @@ public enum ArmorType {
                             "&7- You can purchase better armour in the shop.",
                             "&7- You can enchant your teams armour by clicking",
                             "&7  the upgrades villager")
+                    .setNBT("bed_wars_armour", true)
                     .create()
             );
-            player.getInventory().setHelmet(this.setColor(new CozyItem().setMaterial(Material.LEATHER_CHESTPLATE), color)
+            player.getInventory().setChestplate(this.setColor(new CozyItem().setMaterial(Material.LEATHER_CHESTPLATE), color)
                     .setName("&7&lLeather Chestplate")
                     .setLore("&7Armour will not disappear when you die.",
                             "&7",
                             "&7- You can purchase better armour in the shop.",
                             "&7- You can enchant your teams armour by clicking",
                             "&7  the upgrades villager")
+                    .setNBT("bed_wars_armour", true)
                     .create()
             );
         });

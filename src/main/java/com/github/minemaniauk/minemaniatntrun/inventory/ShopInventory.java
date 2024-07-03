@@ -106,7 +106,7 @@ public class ShopInventory extends CozyInventory {
         this.setSimpleBuyItem(BedWarsItem.TNT, 32);
         this.setSimpleBuyItem(BedWarsItem.FIREBALL, 41);
         this.setSimpleBuyItem(BedWarsItem.WATER_BUCKET, 15);
-        this.setSimpleBuyItem(BedWarsItem.POPUP_TOWER, 24);
+        // this.setSimpleBuyItem(BedWarsItem.POPUP_TOWER, 24);
         this.setSimpleBuyItem(BedWarsItem.BRIDGE_EGG, 33);
         this.setSimpleBuyItem(BedWarsItem.ENDER_PEARL, 42);
 
