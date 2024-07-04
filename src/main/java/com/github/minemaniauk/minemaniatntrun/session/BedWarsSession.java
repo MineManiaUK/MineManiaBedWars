@@ -175,6 +175,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
         this.getOnlinePlayers().forEach(player -> {
             player.setGameMode(GameMode.SURVIVAL);
             player.getInventory().clear();
+            player.getEnderChest().clear();
         });
 
         // Give the players there default items.
