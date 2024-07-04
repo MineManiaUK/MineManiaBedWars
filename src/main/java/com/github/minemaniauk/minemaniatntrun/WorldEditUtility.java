@@ -118,8 +118,15 @@ public final class WorldEditUtility {
         // Create file instance.
         File file = new File(
                 Bukkit.getServer().getPluginManager().getPlugin("FastAsyncWorldEdit").getDataFolder() + "/schematics",
-                identifier + ".schematic"
+                identifier + ".schem"
         );
+
+        if (!file.exists()) {
+            file = new File(
+                    Bukkit.getServer().getPluginManager().getPlugin("FastAsyncWorldEdit").getDataFolder() + "/schematics",
+                    identifier + ".schematic"
+            );
+        }
 
         // Get clipboard format.
         ClipboardFormat format = ClipboardFormats.findByFile(file);

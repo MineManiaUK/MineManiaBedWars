@@ -37,6 +37,8 @@ import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsBlockInte
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
+import com.github.smuddgge.squishyconfiguration.implementation.YamlConfiguration;
+import com.github.smuddgge.squishyconfiguration.interfaces.Configuration;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -53,6 +55,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +71,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
 
     private @NotNull ArenaConfiguration arenaConfiguration;
     private @NotNull SessionManager<BedWarsSession, BedWarsArena> sessionManager;
+    private @NotNull Configuration popUpTowerConfig;
 
     @Override
     public boolean enableCommandDirectory() {
@@ -118,6 +122,10 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
 
         // Register listener.
         this.getServer().getPluginManager().registerEvents(this, this);
+
+        // Set up pop tower config.
+        this.popUpTowerConfig = new YamlConfiguration(this.getDataFolder(), "pop_up_tower.yml");
+        this.popUpTowerConfig.load();
     }
 
     @Override
@@ -392,6 +400,10 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
 
     public @NotNull SessionManager<BedWarsSession, BedWarsArena> getSessionManager() {
         return this.sessionManager;
+    }
+
+    public @NotNull Configuration getPopUpTowerConfig() {
+        return this.popUpTowerConfig;
     }
 
     /**

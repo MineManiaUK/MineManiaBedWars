@@ -82,6 +82,10 @@
                     <groupId>com.github.Cozy-Plugins</groupId>
                     <artifactId>CozyLibrary</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.github.Smuddgge</groupId>
+                    <artifactId>SquishyYaml</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -89,6 +93,12 @@
             <groupId>com.github.Cozy-Plugins</groupId>
             <artifactId>CozyLibrary</artifactId>
             <version>3.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.Smuddgge</groupId>
+            <artifactId>SquishyYaml</artifactId>
+            <version>2.2.1</version>
         </dependency>
 
         <!-- FAWE -->

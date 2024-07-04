@@ -18,10 +18,12 @@
 
 package com.github.minemaniauk.minemaniatntrun.session.component;
 
+import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.location.Region3D;
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.api.game.session.SessionComponent;
+import com.github.minemaniauk.minemaniatntrun.PopUpTower;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
@@ -159,6 +161,25 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
         if (event.getBlock().getType().equals(Material.TNT)) {
             event.getBlockPlaced().setType(Material.AIR);
             event.getPlayer().getWorld().spawn(event.getBlock().getLocation(), TNTPrimed.class);
+        }
+
+        if (event.getItemInHand().getType().equals(Material.CHEST)) {
+            CozyItem item = new CozyItem(event.getItemInHand());
+
+            System.out.println("chest");
+
+            if (item.getName().contains("Pop-Up")) {
+
+                System.out.println("pop up tower");
+
+                event.setCancelled(true);
+                item.setAmount(item.getAmount() - 1);
+
+                TeamPlayer teamPlayer = this.session.getTeamPlayer(event.getPlayer().getUniqueId()).orElse(null);
+                if (teamPlayer == null) return;
+
+                new PopUpTower(event.getBlock().getLocation(), teamPlayer).constructAsync();
+            }
         }
     }
 
