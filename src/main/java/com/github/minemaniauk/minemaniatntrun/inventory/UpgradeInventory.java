@@ -99,6 +99,28 @@ public class UpgradeInventory extends CozyInventory {
             );
         }
 
+        if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.EFFICIENCY) == 0) {
+            this.setUpgradeItem(BedWarsUpgrade.EFFICIENCY, 28, 1);
+        } else {
+            this.setItem(new InventoryItem()
+                    .addSlot(28)
+                    .setMaterial(Material.BLACK_STAINED_GLASS_PANE)
+                    .setName("&f&lEfficiency")
+                    .setLore("&eAlready brought max level 1")
+            );
+        }
+
+        if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.HEAL) == 0) {
+            this.setUpgradeItem(BedWarsUpgrade.HEAL, 29, 1);
+        } else {
+            this.setItem(new InventoryItem()
+                    .addSlot(29)
+                    .setMaterial(Material.BLACK_STAINED_GLASS_PANE)
+                    .setName("&f&lHEAL")
+                    .setLore("&eAlready brought max level 1")
+            );
+        }
+
         if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.ALARM) <= 0) {
             this.setUpgradeItem(BedWarsUpgrade.ALARM, 23, 1);
         } else {
@@ -106,6 +128,28 @@ public class UpgradeInventory extends CozyInventory {
                     .addSlot(23)
                     .setMaterial(Material.LIME_STAINED_GLASS_PANE)
                     .setName("&f&lAlarm")
+                    .setLore("&eAlready brought")
+            );
+        }
+
+        if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.MINING_TRAP) <= 0) {
+            this.setUpgradeItem(BedWarsUpgrade.MINING_TRAP, 24, 1);
+        } else {
+            this.setItem(new InventoryItem()
+                    .addSlot(24)
+                    .setMaterial(Material.LIME_STAINED_GLASS_PANE)
+                    .setName("&f&lMining Fatigue Trap")
+                    .setLore("&eAlready brought")
+            );
+        }
+
+        if (this.teamPlayer.getTeam().getUpgradeLevel(BedWarsUpgrade.SLOWNESS_TRAP) <= 0) {
+            this.setUpgradeItem(BedWarsUpgrade.SLOWNESS_TRAP, 25, 1);
+        } else {
+            this.setItem(new InventoryItem()
+                    .addSlot(25)
+                    .setMaterial(Material.LIME_STAINED_GLASS_PANE)
+                    .setName("&f&lSlowness Trap")
                     .setLore("&eAlready brought")
             );
         }

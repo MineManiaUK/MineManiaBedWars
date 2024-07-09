@@ -53,6 +53,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -364,16 +366,37 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         if (team.getPlayerList().stream().map(TeamPlayer::getPlayerUuid).toList().contains(event.getPlayer().getUniqueId())) return;
 
         // Check if the team has an alarm.
-        if (team.getUpgradeLevel(BedWarsUpgrade.ALARM) == 0) return;
+        if (team.getUpgradeLevel(BedWarsUpgrade.ALARM) >= 1) {
 
-        // Use the alarm.
-        team.setUpgradeLevel(BedWarsUpgrade.ALARM, 0);
+            // Use the alarm.
+            team.setUpgradeLevel(BedWarsUpgrade.ALARM, 0);
 
-        for (TeamPlayer teamPlayer : team.getPlayerList()) {
-            teamPlayer.getPlayer().ifPresent(player -> {
-                new PlayerUser(player).sendMessage("&c&lALARM > &cAn enemy team is at your base!");
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1F, 1F);
-            });
+            for (TeamPlayer teamPlayer : team.getPlayerList()) {
+                teamPlayer.getPlayer().ifPresent(player -> {
+                    new PlayerUser(player).sendMessage("&c&lALARM > &cAn enemy team is at your base!");
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1F, 1F);
+                });
+            }
+        }
+
+        // Check if the team has a mining trap.
+        if (team.getUpgradeLevel(BedWarsUpgrade.MINING_TRAP) >= 1) {
+
+            // Use the alarm.
+            team.setUpgradeLevel(BedWarsUpgrade.MINING_TRAP, 0);
+
+            // Give 30s of slow digging.
+            event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 500, 1));
+        }
+
+        // Check if the team has a slowness trap.
+        if (team.getUpgradeLevel(BedWarsUpgrade.SLOWNESS_TRAP) >= 1) {
+
+            // Use the alarm.
+            team.setUpgradeLevel(BedWarsUpgrade.SLOWNESS_TRAP, 0);
+
+            // Give 30s of slowness.
+            event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 500, 1));
         }
     }
 

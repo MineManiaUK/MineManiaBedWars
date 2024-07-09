@@ -24,11 +24,11 @@ import com.github.cozyplugins.cozylibrary.task.TaskContainer;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.BedWarsItem;
 import com.github.minemaniauk.minemaniatntrun.BedWarsUpgrade;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsStatus;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -154,16 +154,19 @@ public class TeamPlayer extends TaskContainer {
     }
 
     public @NotNull TeamPlayer setPickaxe(@NotNull BedWarsItem pickaxe) {
+        this.updateEfficiencyOnTools();
         this.pickaxe = pickaxe;
         return this;
     }
 
     public @NotNull TeamPlayer setAxe(@NotNull BedWarsItem axe) {
+        this.updateEfficiencyOnTools();
         this.axe = axe;
         return this;
     }
 
     public @NotNull TeamPlayer setShears(@NotNull BedWarsItem shears) {
+        this.updateEfficiencyOnTools();
         this.shears = shears;
         return this;
     }
@@ -175,6 +178,7 @@ public class TeamPlayer extends TaskContainer {
      * @return True if the player is dead.
      */
     public boolean isDead() {
+        if (this.getPlayer().isEmpty()) return true;
         return this.isDead;
     }
 
@@ -239,6 +243,13 @@ public class TeamPlayer extends TaskContainer {
             final long endTimeMills = startRespawnTimeMillis + TeamPlayer.RESPAWN_TIME_LENGTH.toMillis();
 
             if (endTimeMills <= System.currentTimeMillis()) {
+
+                // Check if the team doesn't have a bed.
+                if (!this.getTeam().hasBed()) {
+                    this.stopTask(TeamPlayer.RESPAWN_TASK_IDENTIFIER);
+                    return;
+                }
+
                 this.respawn();
                 this.stopTask(TeamPlayer.RESPAWN_TASK_IDENTIFIER);
             }
@@ -293,9 +304,38 @@ public class TeamPlayer extends TaskContainer {
             if (this.axe != null) inventory.addItem(this.axe.create());
             if (this.shears != null) inventory.addItem(this.shears.create());
 
+            // Efficiency upgrade.
+            this.updateEfficiencyOnTools();
+
             // Set armour.
             this.armourType.applyArmor(this);
             this.getTeam().updateArmour();
+        });
+
+        return this;
+    }
+
+    public @NotNull TeamPlayer updateEfficiencyOnTools() {
+        if (this.getTeam().getUpgradeLevel(BedWarsUpgrade.EFFICIENCY) == 0) return this;
+
+        this.getPlayer().ifPresent(player -> {
+            for (ItemStack item : player.getInventory().getContents()) {
+                if (item == null || item.getType().equals(Material.AIR)) continue;
+
+                if (item.getType().equals(Material.WOODEN_AXE)
+                        || item.getType().equals(Material.STONE_AXE)
+                        || item.getType().equals(Material.DIAMOND_AXE)
+
+                        || item.getType().equals(Material.WOODEN_PICKAXE)
+                        || item.getType().equals(Material.STONE_PICKAXE)
+                        || item.getType().equals(Material.DIAMOND_PICKAXE)
+
+                        || item.getType().equals(Material.SHEARS)) {
+
+                    CozyItem cozyItem = new CozyItem(item);
+                    cozyItem.addEnchantment(Enchantment.DIG_SPEED, 3);
+                }
+            }
         });
 
         return this;

@@ -25,6 +25,7 @@ import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.session.component.BedWarsGeneratorComponent;
 import com.github.minemaniauk.minemaniatntrun.team.player.TeamPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -44,11 +45,15 @@ public class Team {
     private final @NotNull List<TeamPlayer> playerList;
     private final @NotNull Map<BedWarsUpgrade, Integer> upgradeMap;
 
+    private boolean hasBedOverride;
+
     public Team(@NotNull BedWarsSession sessionPointer, @NotNull TeamLocation location) {
         this.sessionPointer = sessionPointer;
         this.location = location;
         this.playerList = new ArrayList<>();
         this.upgradeMap = new HashMap<>();
+
+        this.hasBedOverride = true;
     }
 
     public @NotNull BedWarsSession getSession() {
@@ -141,9 +146,19 @@ public class Team {
      */
     public boolean hasBed() {
         if (this.getPlayerList().isEmpty()) return false;
-        return this.getLocation().getRegion().contains(
-                this.getLocation().getColor().getBed()
-        );
+
+        // Check if the bed still exists.
+        if (this.getLocation().getRegion().contains(this.getLocation().getColor().getBed())) {
+
+            // Return the override.
+            return this.hasBedOverride;
+        }
+
+        return false;
+    }
+
+    public void setHasBed(boolean hasBed) {
+        this.hasBedOverride = hasBed;
     }
 
     /**
@@ -227,6 +242,29 @@ public class Team {
             if (player.getInventory().getBoots() != null) {
                 new CozyItem(player.getInventory().getBoots()).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
             }
+        }
+    }
+
+    public void updateTools() {
+        for (TeamPlayer player : this.getOnlinePlayerList()) {
+            player.updateEfficiencyOnTools();
+        }
+    }
+
+    public void onHeal() {
+        for (TeamPlayer teamPlayer : this.getOnlinePlayerList()) {
+            final Player player = teamPlayer.getPlayer().orElseThrow();
+            final Location playerLocation = player.getLocation();
+            final TeamLocation teamLocation = this.getSession().getArena().getTeamLocation(playerLocation).orElse(null);
+            if (teamLocation == null) continue;
+
+            // Check if they are at there own base.
+            if (!teamLocation.getColor().equals(teamPlayer.getTeam().getLocation().getColor())) continue;
+
+            double newHealth = player.getHealth() + 1;
+            if (newHealth > player.getMaxHealth()) continue;
+
+            player.setHealth(newHealth);
         }
     }
 }

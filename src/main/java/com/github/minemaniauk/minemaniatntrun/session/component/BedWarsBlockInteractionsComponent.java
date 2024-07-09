@@ -107,11 +107,11 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
             // Inform everyone.
             for (Player player : this.getSession().getOnlinePlayers()) {
                 new PlayerUser(player).sendMessage(List.of(
-                        "&8&l---------------------",
+                        "&8&l------------------------------------------",
                         "&7",
-                        "&7 &7 &7 &7 &f" + event.getBlock().getType().name() + " has destroyed &f" + team.getLocation().getColor().getColorCode() + "&l" + team.getLocation().getColor().getTitle() + "'s &fbed.'",
+                        "&7 &7 &7 &7 &f" + event.getPlayer().getName() + " has destroyed &f" + team.getLocation().getColor().getColorCode() + "&l" + team.getLocation().getColor().getTitle() + "'s &fbed.",
                         "&7",
-                        "&8&l---------------------"
+                        "&8&l------------------------------------------"
                 ));
             }
 
@@ -119,18 +119,19 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
             for (TeamPlayer player : team.getOnlinePlayerList()) {
                 final PlayerUser user = new PlayerUser(player.getPlayer().orElseThrow());
                 user.sendMessage(List.of(
-                        "&8&l---------------------",
+                        "&8&l------------------------------------------",
                         "&7",
                         "&f&lYour Bed Has Been Destroyed!",
                         "&7",
                         "&cSomeone has destroyed your bed. You can no longer",
                         "&crespawn when you are killed from now on.",
                         "&7",
-                        "&8&l---------------------"
+                        "&8&l------------------------------------------"
                 ));
             }
 
             // Check if the game is over.
+            team.setHasBed(false);
             if (this.getSession().shouldEnd()) this.getSession().onEnd();
 
             event.setDropItems(false);

@@ -84,6 +84,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
 
         this.registerComponent(new BedWarsBlockInteractionsComponent(this));
         this.registerComponent(new BedWarsGeneratorComponent(this));
+        this.registerComponent(new BedWarsHealUpgradeComponent(this));
         this.registerComponent(new BedWarsNPCComponent(this));
         this.registerComponent(new BedWarsOutOfBoundsComponent(this));
         this.registerComponent(new BedWarsScoreboardComponent(this));
@@ -165,7 +166,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
         // Ensure the teams are made.
         this.ensureTeams();
 
-        if (this.getOnlinePlayers().size() <= 1) {
+        if (this.getTeamList().size() <= 1) {
             this.endGameFully();
             return;
         }
@@ -188,6 +189,9 @@ public class BedWarsSession extends Session<BedWarsArena> {
 
         // Start generator component.
         this.getComponent(BedWarsGeneratorComponent.class).start();
+
+        // Start heal upgrade component.
+        this.getComponent(BedWarsHealUpgradeComponent.class).start();
     }
 
     public void onEnd() {

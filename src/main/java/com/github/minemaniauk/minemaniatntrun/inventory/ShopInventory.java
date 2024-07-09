@@ -121,7 +121,9 @@ public class ShopInventory extends CozyInventory {
 
     public void setTools() {
 
-        if (this.teamPlayer.hasAxe() && this.teamPlayer.getAxe().equals(BedWarsItem.STONE_AXE)) {
+        if (this.teamPlayer.hasAxe() && this.teamPlayer.getAxe().equals(BedWarsItem.DIAMOND_AXE)) {
+            this.setBuyItem(BedWarsItem.DIAMOND_AXE, 37, () -> this.teamPlayer.setAxe(BedWarsItem.DIAMOND_AXE));
+        } else if (this.teamPlayer.hasAxe() && this.teamPlayer.getAxe().equals(BedWarsItem.STONE_AXE)) {
             this.setBuyItem(BedWarsItem.DIAMOND_AXE, 37, () -> this.teamPlayer.setAxe(BedWarsItem.DIAMOND_AXE));
         } else if (this.teamPlayer.hasAxe() && this.teamPlayer.getAxe().equals(BedWarsItem.WOODEN_AXE)) {
             this.setBuyItem(BedWarsItem.STONE_AXE, 37, () -> this.teamPlayer.setAxe(BedWarsItem.STONE_AXE));
@@ -129,12 +131,14 @@ public class ShopInventory extends CozyInventory {
             this.setBuyItem(BedWarsItem.WOODEN_AXE, 37, () -> this.teamPlayer.setAxe(BedWarsItem.WOODEN_AXE));
         }
 
-        if (this.teamPlayer.hasPickaxe() && this.teamPlayer.getAxe().equals(BedWarsItem.STONE_PICKAXE)) {
-            this.setBuyItem(BedWarsItem.DIAMOND_PICKAXE, 38, () -> this.teamPlayer.setAxe(BedWarsItem.DIAMOND_PICKAXE));
-        } else if (this.teamPlayer.hasPickaxe() && this.teamPlayer.getAxe().equals(BedWarsItem.WOODEN_PICKAXE)) {
-            this.setBuyItem(BedWarsItem.STONE_PICKAXE, 38, () -> this.teamPlayer.setAxe(BedWarsItem.STONE_PICKAXE));
+        if (this.teamPlayer.hasPickaxe() && this.teamPlayer.getPickaxe().equals(BedWarsItem.DIAMOND_PICKAXE)) {
+            this.setBuyItem(BedWarsItem.DIAMOND_PICKAXE, 38, () -> this.teamPlayer.setPickaxe(BedWarsItem.DIAMOND_PICKAXE));
+        } else if (this.teamPlayer.hasPickaxe() && this.teamPlayer.getPickaxe().equals(BedWarsItem.STONE_PICKAXE)) {
+            this.setBuyItem(BedWarsItem.DIAMOND_PICKAXE, 38, () -> this.teamPlayer.setPickaxe(BedWarsItem.DIAMOND_PICKAXE));
+        } else if (this.teamPlayer.hasPickaxe() && this.teamPlayer.getPickaxe().equals(BedWarsItem.WOODEN_PICKAXE)) {
+            this.setBuyItem(BedWarsItem.STONE_PICKAXE, 38, () -> this.teamPlayer.setPickaxe(BedWarsItem.STONE_PICKAXE));
         } else {
-            this.setBuyItem(BedWarsItem.WOODEN_PICKAXE, 38, () -> this.teamPlayer.setAxe(BedWarsItem.WOODEN_PICKAXE));
+            this.setBuyItem(BedWarsItem.WOODEN_PICKAXE, 38, () -> this.teamPlayer.setPickaxe(BedWarsItem.WOODEN_PICKAXE));
         }
 
         if (!this.teamPlayer.hasShears()) this.setBuyItem(BedWarsItem.SHEARS, 39, () -> {
@@ -227,6 +231,8 @@ public class ShopInventory extends CozyInventory {
 
                     this.removeResources(costMaterial, costAmount, playerInventory);
                     this.removeOldSwords(user, item.getMaterial());
+                    this.removeOldTools(user, item.getMaterial());
+
                     playerInventory.addItem(item.setName(name.replace("&l", "")).create());
                     user.sendMessage("&a&l> &aYou have brought &e" + item.getName() + "&a for &e" + costAmount + "x &f" + costMaterial.name().split("_")[0].toLowerCase() + "&a.");
                     onPurchase.run();
@@ -246,6 +252,23 @@ public class ShopInventory extends CozyInventory {
             user.getPlayer().getInventory().remove(Material.WOODEN_SWORD);
             user.getPlayer().getInventory().remove(Material.STONE_SWORD);
             user.getPlayer().getInventory().remove(Material.IRON_SWORD);
+        }
+    }
+
+    private void removeOldTools(@NotNull PlayerUser user, @NotNull Material material) {
+        if (material.equals(Material.STONE_AXE)) {
+            user.getPlayer().getInventory().remove(Material.WOODEN_AXE);
+        }
+        if (material.equals(Material.DIAMOND_AXE)) {
+            user.getPlayer().getInventory().remove(Material.WOODEN_AXE);
+            user.getPlayer().getInventory().remove(Material.STONE_AXE);
+        }
+        if (material.equals(Material.STONE_PICKAXE)) {
+            user.getPlayer().getInventory().remove(Material.WOODEN_PICKAXE);
+        }
+        if (material.equals(Material.DIAMOND_PICKAXE)) {
+            user.getPlayer().getInventory().remove(Material.WOODEN_PICKAXE);
+            user.getPlayer().getInventory().remove(Material.STONE_PICKAXE);
         }
     }
 

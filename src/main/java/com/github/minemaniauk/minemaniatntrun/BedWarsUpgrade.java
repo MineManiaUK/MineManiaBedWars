@@ -65,7 +65,7 @@ public enum BedWarsUpgrade {
             .setLore("&7Upgrades your teams generator.")) {
         @Override
         public int getCost(int level) {
-            return level * 4;
+            return level * 2;
         }
 
         @Override
@@ -75,6 +75,36 @@ public enum BedWarsUpgrade {
             team.getGenerator().ifPresent(generator -> {
                 generator.setLevel(generator.getLevel() + 1);
             });
+        }
+    },
+    EFFICIENCY(() -> new CozyItem()
+            .setMaterial(Material.IRON_PICKAXE)
+            .setName("&f&lEfficiency")
+            .setLore("&7Upgrades your teams tools.")) {
+        @Override
+        public int getCost(int level) {
+            return 4;
+        }
+
+        @Override
+        public void onPurchase(@NotNull Team team) {
+            team.setUpgradeLevel(EFFICIENCY, 1);
+
+            team.updateTools();
+        }
+    },
+    HEAL(() -> new CozyItem()
+            .setMaterial(Material.BEACON)
+            .setName("&f&lHeal")
+            .setLore("&7Heals your team at your base.")) {
+        @Override
+        public int getCost(int level) {
+            return 4;
+        }
+
+        @Override
+        public void onPurchase(@NotNull Team team) {
+            team.setUpgradeLevel(HEAL, 1);
         }
     },
     ALARM(() -> new CozyItem()
@@ -89,7 +119,38 @@ public enum BedWarsUpgrade {
 
         @Override
         public void onPurchase(@NotNull Team team) {
-            team.setUpgradeLevel(ALARM, team.getUpgradeLevel(ALARM) + 1);
+            team.setUpgradeLevel(ALARM, 1);
+        }
+    },
+    MINING_TRAP(() -> new CozyItem()
+            .setMaterial(Material.WOODEN_PICKAXE)
+            .setName("&f&lMining Fatigue Trap")
+            .setLore("&7When someone is at your base it will take",
+                    "&7longer for them to destroy your bed.")) {
+
+        @Override
+        public int getCost(int level) {
+            return 1;
+        }
+
+        @Override
+        public void onPurchase(@NotNull Team team) {
+            team.setUpgradeLevel(MINING_TRAP, 1);
+        }
+    },
+    SLOWNESS_TRAP(() -> new CozyItem()
+            .setMaterial(Material.LEATHER_BOOTS)
+            .setName("&f&lSlowness Trap")
+            .setLore("&7When someone is at your base they will get slowness.")) {
+
+        @Override
+        public int getCost(int level) {
+            return 1;
+        }
+
+        @Override
+        public void onPurchase(@NotNull Team team) {
+            team.setUpgradeLevel(SLOWNESS_TRAP, 1);
         }
     };
 
