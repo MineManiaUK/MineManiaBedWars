@@ -145,9 +145,11 @@ public class BedWarsSession extends Session<BedWarsArena> {
 
     public void onPlayerDeath(@NotNull TeamPlayer player) {
         if (this.getStatus() == BedWarsStatus.SELECTING_TEAMS) return;
+
         player.getPlayer().ifPresent(presentPlayer -> {
             presentPlayer.getWorld().spawnParticle(Particle.CLOUD, presentPlayer.getLocation(), 4);
         });
+
         Bukkit.broadcastMessage(MessageManager.parse("&7&l> &7" + player.getName() + " died."));
         if (this.shouldEnd()) this.onEnd();
     }
@@ -313,8 +315,8 @@ public class BedWarsSession extends Session<BedWarsArena> {
      */
     public @NotNull List<UUID> getPlayersNotInATeam() {
         List<UUID> list = new ArrayList<>();
-        for (UUID playerUuid : this.getPlayerUuids()) {
-            if (this.getTeam(playerUuid).isEmpty()) list.add(playerUuid);
+        for (Player player : this.getOnlinePlayers()) {
+            if (this.getTeam(player.getUniqueId()).isEmpty()) list.add(player.getUniqueId());
         }
         return list;
     }

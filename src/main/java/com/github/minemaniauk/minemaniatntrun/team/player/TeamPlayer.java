@@ -25,6 +25,7 @@ import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.minemaniatntrun.BedWarsItem;
 import com.github.minemaniauk.minemaniatntrun.BedWarsUpgrade;
 import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.session.BedWarsStatus;
 import com.github.minemaniauk.minemaniatntrun.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -140,6 +141,18 @@ public class TeamPlayer extends TaskContainer {
         return this.shears != null;
     }
 
+    public @NotNull BedWarsItem getPickaxe() {
+        return this.pickaxe;
+    }
+
+    public @NotNull BedWarsItem getAxe() {
+        return this.axe;
+    }
+
+    public @NotNull BedWarsItem getShears() {
+        return this.shears;
+    }
+
     public @NotNull TeamPlayer setPickaxe(@NotNull BedWarsItem pickaxe) {
         this.pickaxe = pickaxe;
         return this;
@@ -211,6 +224,17 @@ public class TeamPlayer extends TaskContainer {
         });
 
         this.runTaskLoop(TeamPlayer.RESPAWN_TASK_IDENTIFIER, () -> {
+
+            // Check if the player is offline.
+            if (this.getPlayer().isEmpty()) {
+
+                // Check if the game has stopped.
+                if (this.getTeam().getSession().getStatus().equals(BedWarsStatus.ENDING)) {
+                    this.stopTask(TeamPlayer.RESPAWN_TASK_IDENTIFIER);
+                }
+
+                return;
+            }
 
             final long endTimeMills = startRespawnTimeMillis + TeamPlayer.RESPAWN_TIME_LENGTH.toMillis();
 

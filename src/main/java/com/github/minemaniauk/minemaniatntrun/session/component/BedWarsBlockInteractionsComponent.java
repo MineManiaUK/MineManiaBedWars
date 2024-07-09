@@ -33,6 +33,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
@@ -99,10 +100,20 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
             }
 
             // Otherwise the bed has been destroyed.
-
             // Spawn particles.
             final World world = event.getBlock().getWorld();
             world.spawnParticle(Particle.DAMAGE_INDICATOR, event.getBlock().getLocation().clone().add(new Vector(0, 2, 0)), 10);
+
+            // Inform everyone.
+            for (Player player : this.getSession().getOnlinePlayers()) {
+                new PlayerUser(player).sendMessage(List.of(
+                        "&8&l---------------------",
+                        "&7",
+                        "&7 &7 &7 &7 &f" + event.getBlock().getType().name() + " has destroyed &f" + team.getLocation().getColor().getColorCode() + "&l" + team.getLocation().getColor().getTitle() + "'s &fbed.'",
+                        "&7",
+                        "&8&l---------------------"
+                ));
+            }
 
             // Inform the players.
             for (TeamPlayer player : team.getOnlinePlayerList()) {
@@ -118,6 +129,9 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
                         "&8&l---------------------"
                 ));
             }
+
+            // Check if the game is over.
+            if (this.getSession().shouldEnd()) this.getSession().onEnd();
 
             event.setDropItems(false);
             return;

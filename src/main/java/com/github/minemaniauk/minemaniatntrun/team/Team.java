@@ -178,6 +178,7 @@ public class Team {
 
     public boolean isOut() {
         if (this.hasBed()) return false;
+
         return !this.getPlayerList().stream()
                 .map(TeamPlayer::isDead).toList()
                 .contains(false);

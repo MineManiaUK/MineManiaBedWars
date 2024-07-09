@@ -51,6 +51,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -140,6 +141,21 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
 
         // Unregister the local arenas.
         MineManiaBedWars.getAPI().getGameManager().unregisterLocalArenas();
+    }
+
+    @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent event) {
+
+        for (BedWarsSession session : this.sessionManager.getSessionList()) {
+            TeamPlayer player = session.getTeamPlayer(event.getPlayer().getUniqueId()).orElse(null);
+            if (player == null) continue;
+
+            Team team = player.getTeam();
+
+            if (!team.hasBed()) {
+                player.kill();
+            }
+        }
     }
 
     @EventHandler

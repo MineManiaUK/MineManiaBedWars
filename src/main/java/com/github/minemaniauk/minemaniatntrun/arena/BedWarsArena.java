@@ -22,6 +22,8 @@ import com.github.cozyplugins.cozylibrary.indicator.LocationConvertable;
 import com.github.cozyplugins.cozylibrary.indicator.Savable;
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.location.Region3D;
+import com.github.kerbity.kerb.result.CompletableResultSet;
+import com.github.kerbity.kerb.result.ResultSet;
 import com.github.minemaniauk.api.MineManiaLocation;
 import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.game.GameType;
@@ -36,9 +38,14 @@ import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
 import com.github.smuddgge.squishyconfiguration.indicator.ConfigurationConvertable;
 import com.github.smuddgge.squishyconfiguration.interfaces.ConfigurationSection;
 import com.github.smuddgge.squishyconfiguration.memory.MemoryConfigurationSection;
+import com.google.common.collect.Iterables;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,12 +106,25 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
 
             // Teleport the players.
             for (MineManiaUser user : this.getGameRoom().get().getPlayers()) {
-                user.getActions().sendMessage("&7&l> &fGame started! &7Teleporting you to the game arena.");
-                user.getActions().teleport(location);
+                new Thread(() -> {
+                    this.sendMessage(user);
+                }).start();
+                new Thread(() -> {
+                    this.teleport(user, location);
+                }).start();
             }
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+    }
+
+    private void sendMessage(@NotNull MineManiaUser user) {
+        boolean completed = user.getActions().sendMessage("&7&l> &fGame started! &7Teleporting you to the game arena.");
+        if (!completed) this.sendMessage(user);
+    }
+
+    private void teleport(@NotNull MineManiaUser user, @NotNull MineManiaLocation location) {
+        user.getActions().teleport(location);
     }
 
     @Override

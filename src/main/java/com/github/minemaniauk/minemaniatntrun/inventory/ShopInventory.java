@@ -121,11 +121,21 @@ public class ShopInventory extends CozyInventory {
 
     public void setTools() {
 
-        if (this.teamPlayer.hasAxe()) this.setSimpleBuyItem(BedWarsItem.STONE_AXE, 37);
-        else this.setBuyItem(BedWarsItem.WOODEN_AXE, 37, () -> this.teamPlayer.setAxe(BedWarsItem.WOODEN_AXE));
+        if (this.teamPlayer.hasAxe() && this.teamPlayer.getAxe().equals(BedWarsItem.STONE_AXE)) {
+            this.setBuyItem(BedWarsItem.DIAMOND_AXE, 37, () -> this.teamPlayer.setAxe(BedWarsItem.DIAMOND_AXE));
+        } else if (this.teamPlayer.hasAxe() && this.teamPlayer.getAxe().equals(BedWarsItem.WOODEN_AXE)) {
+            this.setBuyItem(BedWarsItem.STONE_AXE, 37, () -> this.teamPlayer.setAxe(BedWarsItem.STONE_AXE));
+        } else {
+            this.setBuyItem(BedWarsItem.WOODEN_AXE, 37, () -> this.teamPlayer.setAxe(BedWarsItem.WOODEN_AXE));
+        }
 
-        if (this.teamPlayer.hasPickaxe()) this.setSimpleBuyItem(BedWarsItem.STONE_PICKAXE, 38);
-        else this.setBuyItem(BedWarsItem.WOODEN_PICKAXE, 38, () -> this.teamPlayer.setPickaxe(BedWarsItem.WOODEN_PICKAXE));
+        if (this.teamPlayer.hasPickaxe() && this.teamPlayer.getAxe().equals(BedWarsItem.STONE_PICKAXE)) {
+            this.setBuyItem(BedWarsItem.DIAMOND_PICKAXE, 38, () -> this.teamPlayer.setAxe(BedWarsItem.DIAMOND_PICKAXE));
+        } else if (this.teamPlayer.hasPickaxe() && this.teamPlayer.getAxe().equals(BedWarsItem.WOODEN_PICKAXE)) {
+            this.setBuyItem(BedWarsItem.STONE_PICKAXE, 38, () -> this.teamPlayer.setAxe(BedWarsItem.STONE_PICKAXE));
+        } else {
+            this.setBuyItem(BedWarsItem.WOODEN_PICKAXE, 38, () -> this.teamPlayer.setAxe(BedWarsItem.WOODEN_PICKAXE));
+        }
 
         if (!this.teamPlayer.hasShears()) this.setBuyItem(BedWarsItem.SHEARS, 39, () -> {
             this.teamPlayer.setShears(BedWarsItem.SHEARS);

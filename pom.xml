@@ -76,7 +76,7 @@
         <dependency>
             <groupId>com.github.MineManiaUK</groupId>
             <artifactId>MineManiaAPI-Bukkit</artifactId>
-            <version>4.3.0</version>
+            <version>4.7.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.Cozy-Plugins</groupId>

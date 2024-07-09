@@ -50,6 +50,13 @@ public enum BedWarsItem {
             Material.GOLD_INGOT,
             5
     ),
+    DIAMOND_AXE(() -> new CozyItem(Material.DIAMOND_AXE)
+            .setName("Diamond Axe")
+            .setLore("&7- This item will disappear when you die.")
+            .setUnbreakable(true),
+            Material.GOLD_INGOT,
+            10
+    ),
     WOODEN_PICKAXE(() -> new CozyItem(Material.WOODEN_PICKAXE)
             .setName("Wooden Pickaxe")
             .setLore("&7- This item will stay with you when you die.")
@@ -63,6 +70,13 @@ public enum BedWarsItem {
             .setUnbreakable(true),
             Material.GOLD_INGOT,
             5
+    ),
+    DIAMOND_PICKAXE(() -> new CozyItem(Material.DIAMOND_PICKAXE)
+            .setName("Diamond Pickaxe")
+            .setLore("&7- This item will disappear when you die.")
+            .setUnbreakable(true),
+            Material.GOLD_INGOT,
+            10
     ),
     SHEARS(() -> new CozyItem(Material.SHEARS)
             .setName("Shears")
