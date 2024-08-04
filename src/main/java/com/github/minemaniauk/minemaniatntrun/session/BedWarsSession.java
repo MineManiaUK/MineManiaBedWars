@@ -90,10 +90,12 @@ public class BedWarsSession extends Session<BedWarsArena> {
         this.registerComponent(new BedWarsScoreboardComponent(this));
         this.registerComponent(new BedWarsSelectTeamComponent(this));
         this.registerComponent(new BedWarsEndComponent(this));
+        this.registerComponent(new BedWarsEnsureDeadComponent(this));
 
         this.getComponent(BedWarsOutOfBoundsComponent.class).start();
         this.getComponent(BedWarsScoreboardComponent.class).start();
         this.getComponent(BedWarsSelectTeamComponent.class).start();
+        this.getComponent(BedWarsEnsureDeadComponent.class).start();
     }
 
     /**
@@ -179,6 +181,10 @@ public class BedWarsSession extends Session<BedWarsArena> {
             player.setGameMode(GameMode.SURVIVAL);
             player.getInventory().clear();
             player.getEnderChest().clear();
+
+            for (Player temp : Bukkit.getOnlinePlayers()) {
+                temp.showPlayer(MineManiaBedWars.getPlugin(), player);
+            }
         });
 
         // Give the players there default items.

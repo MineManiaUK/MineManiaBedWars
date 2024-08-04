@@ -265,7 +265,8 @@ public enum BedWarsItem {
                     new PotionEffect(PotionEffectType.INVISIBILITY, 600, 2),
                     true
             )
-            .setPotionColor(Color.WHITE),
+            .setPotionColor(Color.WHITE)
+            .setNBT("bedwars_invisibility", true),
             Material.EMERALD,
             2
     ),

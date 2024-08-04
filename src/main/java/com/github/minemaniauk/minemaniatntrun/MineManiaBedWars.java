@@ -22,7 +22,9 @@ package com.github.minemaniauk.minemaniatntrun;
 import com.github.cozyplugins.cozylibrary.CozyPlugin;
 import com.github.cozyplugins.cozylibrary.command.command.command.ProgrammableCommand;
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
+import com.github.cozyplugins.cozylibrary.location.Region;
 import com.github.cozyplugins.cozylibrary.location.Region3D;
+import com.github.cozyplugins.cozylibrary.task.TaskContainer;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.game.session.SessionManager;
@@ -44,21 +46,21 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +78,8 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
     private @NotNull SessionManager<BedWarsSession, BedWarsArena> sessionManager;
     private @NotNull Configuration popUpTowerConfig;
 
+    private @NotNull TaskContainer taskContainer;
+
     @Override
     public boolean enableCommandDirectory() {
         return false;
@@ -86,6 +90,9 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
 
         // Initialize this instance.
         MineManiaBedWars.instance = this;
+
+        // Task container.
+        this.taskContainer = new TaskContainer();
 
         // Add configuration.
         this.arenaConfiguration = new ArenaConfiguration();
@@ -135,6 +142,9 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
     public void onDisable() {
         super.onDisable();
 
+        // Stop tasks.
+        this.taskContainer.stopAllTasks();
+
         // Loop though all sessions and stop them.
         this.sessionManager.stopAllSessionComponents();
 
@@ -152,11 +162,25 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
             TeamPlayer player = session.getTeamPlayer(event.getPlayer().getUniqueId()).orElse(null);
             if (player == null) continue;
 
+            player.stopAllTasks();
+
             Team team = player.getTeam();
 
             if (!team.hasBed()) {
                 player.kill();
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+
+        for (BedWarsSession session : this.sessionManager.getSessionList()) {
+            TeamPlayer player = session.getTeamPlayer(event.getPlayer().getUniqueId()).orElse(null);
+            if (player == null) continue;
+
+            player.kill();
+            return;
         }
     }
 
@@ -306,7 +330,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         BukkitRunnable eggTimer = new BukkitRunnable() {
             @Override
             public void run() {
-                if(egg.isDead() || egg.getLocation().getY() < 80) {
+                if (egg.isDead() || egg.getLocation().getY() < 80) {
                     this.cancel();
                     return;
                 }
@@ -343,9 +367,55 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
     }
 
     @EventHandler
+    public void onInvisibility(EntityPotionEffectEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (event.getNewEffect() == null) return;
+        if (!event.getNewEffect().getType().equals(PotionEffectType.INVISIBILITY)) return;
+
+        final Location location = player.getLocation();
+
+        // Check if it was in an arena.
+        final BedWarsArena arena = this.getArena(location).orElse(null);
+        if (arena == null) return;
+
+        // Check if the arena is in a session.
+        BedWarsSession session = this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
+        if (session == null) return;
+
+        for (Player temp : Bukkit.getOnlinePlayers()) {
+            temp.hidePlayer(this, player);
+        }
+
+        this.taskContainer.runTaskLater(player.getUniqueId().toString(), () -> {
+            for (Player temp : Bukkit.getOnlinePlayers()) {
+                temp.showPlayer(this, player);
+            }
+        }, event.getNewEffect().getDuration());
+    }
+
+    @EventHandler
+    public void onPlayerInteractWithInvisibility(PlayerInteractEvent event) {
+        if (event.getAction().equals(Action.LEFT_CLICK_AIR)
+                || event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
+
+            final Location location = event.getPlayer().getLocation().clone();
+            final Region region = new Region(location.clone().add(new Vector(-4, -4, -4)), location.clone().add(new Vector(4, 4, 4)));
+
+            for (Player temp : Bukkit.getOnlinePlayers()) {
+                if (!temp.hasPotionEffect(PotionEffectType.INVISIBILITY)) continue;
+                if (region.contains(temp.getLocation())) {
+                    for (Player temp2 : Bukkit.getOnlinePlayers()) {
+                        temp2.showPlayer(this, temp);
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
     public void onEnemyInBase(PlayerMoveEvent event) {
         Location location = event.getTo();
-        if(location == null) return;
+        if (location == null) return;
 
         // Check if it was in an arena.
         final BedWarsArena arena = this.getArena(location).orElse(null);
@@ -363,7 +433,8 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         if (team == null) return;
 
         // Check if the player is on their team.
-        if (team.getPlayerList().stream().map(TeamPlayer::getPlayerUuid).toList().contains(event.getPlayer().getUniqueId())) return;
+        if (team.getPlayerList().stream().map(TeamPlayer::getPlayerUuid).toList().contains(event.getPlayer().getUniqueId()))
+            return;
 
         // Check if the team has an alarm.
         if (team.getUpgradeLevel(BedWarsUpgrade.ALARM) >= 1) {
