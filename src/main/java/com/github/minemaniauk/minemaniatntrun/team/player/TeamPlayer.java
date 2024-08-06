@@ -213,6 +213,7 @@ public class TeamPlayer extends TaskContainer {
      * @return This instance.
      */
     public @NotNull TeamPlayer startRespawnTask() {
+        this.isDead = true;
 
         long startRespawnTimeMillis = System.currentTimeMillis();
 
@@ -247,6 +248,7 @@ public class TeamPlayer extends TaskContainer {
                 // Check if the team doesn't have a bed.
                 if (!this.getTeam().hasBed()) {
                     this.stopTask(TeamPlayer.RESPAWN_TASK_IDENTIFIER);
+                    System.out.println("No bed");
                     return;
                 }
 
@@ -266,12 +268,18 @@ public class TeamPlayer extends TaskContainer {
      * @return This instance.
      */
     public @NotNull TeamPlayer respawn() {
+        System.out.println("respawn " + this.getName());
         this.isDead = false;
 
         this.getPlayer().ifPresent(player -> {
             player.getInventory().clear();
             player.teleport(this.getTeam().getLocation().getSpawnPoint());
             player.setGameMode(GameMode.SURVIVAL);
+
+            System.out.println("present " + player.getName());
+            this.runTaskLater(UUID.randomUUID().toString(), () -> {
+                new PlayerUser(player).forceGameMode(GameMode.SURVIVAL);
+            }, 20);
         });
 
         this.giveDefaultItems();

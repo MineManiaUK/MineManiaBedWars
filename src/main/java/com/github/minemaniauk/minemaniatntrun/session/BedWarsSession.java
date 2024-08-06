@@ -91,11 +91,13 @@ public class BedWarsSession extends Session<BedWarsArena> {
         this.registerComponent(new BedWarsSelectTeamComponent(this));
         this.registerComponent(new BedWarsEndComponent(this));
         this.registerComponent(new BedWarsEnsureDeadComponent(this));
+        this.registerComponent(new BedWarsSpectatorComponent(this));
 
         this.getComponent(BedWarsOutOfBoundsComponent.class).start();
         this.getComponent(BedWarsScoreboardComponent.class).start();
         this.getComponent(BedWarsSelectTeamComponent.class).start();
         this.getComponent(BedWarsEnsureDeadComponent.class).start();
+        this.getComponent(BedWarsSpectatorComponent.class).start();
     }
 
     /**
