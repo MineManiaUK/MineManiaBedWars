@@ -114,6 +114,16 @@ public enum BedWarsItem {
             3
     ),
 
+    // Stick.
+    KNOCKBACK_STICK(() -> new CozyItem(Material.STICK)
+            .setName("Knockback Stick")
+            .setLore("&7- This item will disappear when you die.")
+            .addEnchantment(Enchantment.KNOCKBACK, 2)
+            .setUnbreakable(true),
+            Material.GOLD_INGOT,
+            5
+    ),
+
     // Bows.
     ARROWS(() -> new CozyItem(Material.ARROW)
             .setName("Arrow")

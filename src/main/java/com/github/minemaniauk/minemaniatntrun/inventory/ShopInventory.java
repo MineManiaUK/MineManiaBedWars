@@ -100,7 +100,8 @@ public class ShopInventory extends CozyInventory {
         );
 
         this.setSimpleBuyItem(BedWarsItem.GLASS, 14);
-        this.setSimpleBuyItem(BedWarsItem.LADDER, 23);
+        // this.setSimpleBuyItem(BedWarsItem.LADDER, 23);
+        this.setSimpleBuyItem(BedWarsItem.KNOCKBACK_STICK, 23);
 
         // Utility.
         this.setSimpleBuyItem(BedWarsItem.TNT, 32);
