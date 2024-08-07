@@ -53,6 +53,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
@@ -469,6 +470,11 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
             // Give 30s of slowness.
             event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 500, 1));
         }
+    }
+
+    @EventHandler
+    public void onCrafting(CraftItemEvent event) {
+        event.setCancelled(true);
     }
 
     /**
