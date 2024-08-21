@@ -25,7 +25,7 @@ import com.github.minemaniauk.api.database.collection.UserCollection;
 import com.github.minemaniauk.api.database.record.GameRoomRecord;
 import com.github.minemaniauk.api.game.session.Session;
 import com.github.minemaniauk.api.user.MineManiaUser;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsPlugin;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArenaFactory;
 import com.github.minemaniauk.minemaniatntrun.session.component.*;
@@ -185,7 +185,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
             player.getEnderChest().clear();
 
             for (Player temp : Bukkit.getOnlinePlayers()) {
-                temp.showPlayer(MineManiaBedWars.getPlugin(), player);
+                temp.showPlayer(MineManiaBedWarsPlugin.getInstance().getPlugin(), player);
             }
         });
 
@@ -211,12 +211,12 @@ public class BedWarsSession extends Session<BedWarsArena> {
         for (TeamPlayer teamPlayer : winningTeam.getPlayerList()) {
 
             // Give the winner the correct amount of paws.
-            MineManiaBedWars.getAPI().getDatabase()
+            MineManiaBedWarsPlugin.getAPI().getDatabase()
                     .getTable(UserCollection.class)
                     .getUserRecord(teamPlayer.getPlayerUuid())
                     .ifPresent(user -> {
                         user.addPaws(pawReward);
-                        MineManiaBedWars.getAPI().getDatabase()
+                        MineManiaBedWarsPlugin.getAPI().getDatabase()
                                 .getTable(UserCollection.class)
                                 .insertRecord(user);
                     });
@@ -311,7 +311,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
 
         // Add the online players.
         this.record.getPlayers().forEach(
-                user -> MineManiaBedWars.getInstance()
+                user -> MineManiaBedWarsPlugin.getInstance()
                         .getOnlinePlayer(user.getUniqueId())
                         .ifPresent(playerList::add)
         );

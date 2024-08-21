@@ -20,15 +20,16 @@
 package com.github.minemaniauk.minemaniatntrun;
 
 import com.github.cozyplugins.cozylibrary.CozyPlugin;
+import com.github.cozyplugins.cozylibrary.command.CommandManager;
 import com.github.cozyplugins.cozylibrary.command.command.command.ProgrammableCommand;
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
 import com.github.cozyplugins.cozylibrary.location.Region;
-import com.github.cozyplugins.cozylibrary.location.Region3D;
+import com.github.cozyplugins.cozylibrary.placeholder.PlaceholderManager;
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.api.MineManiaAPI;
 import com.github.minemaniauk.api.game.session.SessionManager;
-import com.github.minemaniauk.bukkitapi.MineManiaAPI_Bukkit;
+import com.github.minemaniauk.bukkitapi.MineManiaAPI_BukkitPlugin;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.command.*;
 import com.github.minemaniauk.minemaniatntrun.configuration.ArenaConfiguration;
@@ -57,6 +58,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -71,9 +73,9 @@ import java.util.UUID;
 /**
  * Represents the main class.
  */
-public final class MineManiaBedWars extends CozyPlugin implements Listener {
+public final class MineManiaBedWarsPlugin extends CozyPlugin implements Listener {
 
-    private static @NotNull MineManiaBedWars instance;
+    private static @NotNull MineManiaBedWarsPlugin instance;
 
     private @NotNull ArenaConfiguration arenaConfiguration;
     private @NotNull SessionManager<BedWarsSession, BedWarsArena> sessionManager;
@@ -81,34 +83,64 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
 
     private @NotNull TaskContainer taskContainer;
 
+    public MineManiaBedWarsPlugin(@NotNull JavaPlugin plugin) {
+        super(plugin);
+    }
+
     @Override
-    public boolean enableCommandDirectory() {
+    public boolean isCommandTypesEnabled() {
         return false;
     }
 
     @Override
-    public void onCozyEnable() {
+    public void onEnable() {
 
         // Initialize this instance.
-        MineManiaBedWars.instance = this;
+        MineManiaBedWarsPlugin.instance = this;
 
         // Task container.
         this.taskContainer = new TaskContainer();
 
         // Add configuration.
         this.arenaConfiguration = new ArenaConfiguration();
-        this.arenaConfiguration.reload();
+        this.arenaConfiguration.load();
 
         // Add arenas from configuration to api.
-        this.arenaConfiguration.getAllTypes().forEach(
-                arena -> MineManiaBedWars.getAPI().getGameManager().registerArena(arena)
+        this.arenaConfiguration.getAll().forEach(
+                arena -> MineManiaBedWarsPlugin.getAPI().getGameManager().registerArena(arena)
         );
 
         // Add session manager.
         this.sessionManager = new SessionManager<>();
 
-        // Add commands.
-        this.addCommand(new ProgrammableCommand("bedwars")
+        // Register listener.
+        this.getPlugin().getServer().getPluginManager().registerEvents(this, this.getPlugin());
+
+        // Set up pop tower config.
+        this.popUpTowerConfig = new YamlConfiguration(this.getPlugin().getDataFolder(), "pop_up_tower.yml");
+        this.popUpTowerConfig.load();
+    }
+
+    @Override
+    public void onDisable() {
+
+        // Stop tasks.
+        this.taskContainer.stopAllTasks();
+
+        // Loop though all sessions and stop them.
+        this.sessionManager.stopAllSessionComponents();
+
+        // Remove game identifier.
+        this.getArenaConfiguration().resetGameIdentifiers();
+
+        // Unregister the local arenas.
+        MineManiaBedWarsPlugin.getAPI().getGameManager().unregisterLocalArenas();
+    }
+
+    @Override
+    protected void onLoadCommands(@NotNull CommandManager commandManager) {
+
+        commandManager.addCommand(new ProgrammableCommand("bedwars")
                 .setDescription("Contains bed wars commands.")
                 .setSyntax("/bedwars")
                 .addSubCommand(new ProgrammableCommand("arena")
@@ -130,30 +162,11 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
                         )
                 )
         );
-
-        // Register listener.
-        this.getServer().getPluginManager().registerEvents(this, this);
-
-        // Set up pop tower config.
-        this.popUpTowerConfig = new YamlConfiguration(this.getDataFolder(), "pop_up_tower.yml");
-        this.popUpTowerConfig.load();
     }
 
     @Override
-    public void onDisable() {
-        super.onDisable();
+    protected void onLoadPlaceholders(@NotNull PlaceholderManager placeholderManager) {
 
-        // Stop tasks.
-        this.taskContainer.stopAllTasks();
-
-        // Loop though all sessions and stop them.
-        this.sessionManager.stopAllSessionComponents();
-
-        // Remove game identifier.
-        this.getArenaConfiguration().resetGameIdentifiers();
-
-        // Unregister the local arenas.
-        MineManiaBedWars.getAPI().getGameManager().unregisterLocalArenas();
     }
 
     @EventHandler
@@ -277,7 +290,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         CozyItem item = new CozyItem(event.getCurrentItem());
         if (item.getMaterial().equals(Material.AIR)) return;
         if (!item.hasNBT()) return;
-        if (Boolean.TRUE.equals(item.getNBTBoolean("bed_wars_armour"))) {
+        if (item.getNBTString("bed_wars_armour").equals("true")) {
             event.setCancelled(true);
         }
     }
@@ -337,11 +350,11 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
                 }
 
                 // Check if it was in an arena.
-                final BedWarsArena arena = MineManiaBedWars.this.getArena(egg.getLocation()).orElse(null);
+                final BedWarsArena arena = MineManiaBedWarsPlugin.this.getArena(egg.getLocation()).orElse(null);
                 if (arena == null) return;
 
                 // Check if the arena is in a session.
-                BedWarsSession session = MineManiaBedWars.this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
+                BedWarsSession session = MineManiaBedWarsPlugin.this.sessionManager.getSession(arena.getIdentifier()).orElse(null);
                 if (session == null) return;
 
                 TeamPlayer teamPlayer = session.getTeamPlayer(((Player) egg.getShooter()).getUniqueId()).orElse(null);
@@ -364,7 +377,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
                 }
             }
         };
-        eggTimer.runTaskTimer(this, 1L, 1L);
+        eggTimer.runTaskTimer(this.getPlugin(), 1L, 1L);
     }
 
     @EventHandler
@@ -384,12 +397,12 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         if (session == null) return;
 
         for (Player temp : Bukkit.getOnlinePlayers()) {
-            temp.hidePlayer(this, player);
+            temp.hidePlayer(this.getPlugin(), player);
         }
 
         this.taskContainer.runTaskLater(player.getUniqueId().toString(), () -> {
             for (Player temp : Bukkit.getOnlinePlayers()) {
-                temp.showPlayer(this, player);
+                temp.showPlayer(this.getPlugin(), player);
             }
         }, event.getNewEffect().getDuration());
     }
@@ -406,7 +419,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
                 if (!temp.hasPotionEffect(PotionEffectType.INVISIBILITY)) continue;
                 if (region.contains(temp.getLocation())) {
                     for (Player temp2 : Bukkit.getOnlinePlayers()) {
-                        temp2.showPlayer(this, temp);
+                        temp2.showPlayer(this.getPlugin(), temp);
                     }
                 }
             }
@@ -506,7 +519,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
      * @return The arena that contains the location.
      */
     public @NotNull Optional<BedWarsArena> getArena(@NotNull Location location) {
-        for (BedWarsArena arena : this.getArenaConfiguration().getAllTypes()) {
+        for (BedWarsArena arena : this.getArenaConfiguration().getAll()) {
             if (arena.getRegion().isEmpty()) continue;
             if (arena.getRegion().get().contains(location)) return Optional.of(arena);
         }
@@ -533,7 +546,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
      * @return The instance of the tnt arena created.
      */
     public @NotNull BedWarsArena createArena(@NotNull UUID identifier,
-                                             @NotNull Region3D region,
+                                             @NotNull Region region,
                                              int minPlayers,
                                              int maxPlayers) {
 
@@ -543,7 +556,7 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
         arena.setMaxPlayers(maxPlayers);
 
         // Register and save the arena.
-        MineManiaBedWars.getAPI().getGameManager().registerArena(arena);
+        MineManiaBedWarsPlugin.getAPI().getGameManager().registerArena(arena);
         return arena;
     }
 
@@ -552,8 +565,8 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
      *
      * @return The instance of this plugin.
      */
-    public static @NotNull MineManiaBedWars getInstance() {
-        return MineManiaBedWars.instance;
+    public static @NotNull MineManiaBedWarsPlugin getInstance() {
+        return MineManiaBedWarsPlugin.instance;
     }
 
     /**
@@ -562,6 +575,6 @@ public final class MineManiaBedWars extends CozyPlugin implements Listener {
      * @return The instance of the mine mania api.
      */
     public static @NotNull MineManiaAPI getAPI() {
-        return MineManiaAPI_Bukkit.getInstance().getAPI();
+        return MineManiaAPI_BukkitPlugin.getInstance().getAPI();
     }
 }

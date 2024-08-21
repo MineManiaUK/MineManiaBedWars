@@ -1,6 +1,5 @@
 package com.github.minemaniauk.minemaniatntrun;
 
-import com.github.cozyplugins.cozylibrary.location.Region3D;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
@@ -59,11 +58,11 @@ public final class WorldEditUtility {
      * @param user The instance of a user.
      * @return This requested region.
      */
-    public static @NotNull Region3D getSelectionRegion3D(@NotNull PlayerUser user) {
+    public static @NotNull com.github.cozyplugins.cozylibrary.location.Region getSelectionRegion3D(@NotNull PlayerUser user) {
         Player actor = BukkitAdapter.adapt(user.getPlayer());
 
         // Create the region.
-        return new Region3D(
+        return new com.github.cozyplugins.cozylibrary.location.Region(
                 new Location(
                         BukkitAdapter.asBukkitWorld(actor.getWorld()).getWorld(),
                         actor.getSelection().getMaximumPoint().getBlockX(),
@@ -137,7 +136,7 @@ public final class WorldEditUtility {
             return reader.read();
 
         } catch (IOException exception) {
-            MineManiaBedWars.getInstance().getLogger().warning("Tried to get a schematic but could not read the file.");
+            MineManiaBedWarsPlugin.getInstance().getPlugin().getLogger().warning("Tried to get a schematic but could not read the file.");
             throw new RuntimeException(exception);
         }
     }
@@ -163,7 +162,7 @@ public final class WorldEditUtility {
             Operations.complete(operation);
 
         } catch (Exception exception) {
-            MineManiaBedWars.getInstance().getLogger().warning("Tried to paste a schematic but was unable to.");
+            MineManiaBedWarsPlugin.getInstance().getPlugin().getLogger().warning("Tried to paste a schematic but was unable to.");
             throw new RuntimeException(exception);
         }
     }

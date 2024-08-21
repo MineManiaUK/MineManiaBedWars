@@ -27,7 +27,7 @@ import com.github.cozyplugins.cozylibrary.user.ConsoleUser;
 import com.github.cozyplugins.cozylibrary.user.FakeUser;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.cozyplugins.cozylibrary.user.User;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsPlugin;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.generator.GeneratorLocation;
 import com.github.minemaniauk.minemaniatntrun.generator.GeneratorType;
@@ -72,7 +72,7 @@ public class ArenaSetGeneratorCommand implements CondensedCommand {
         final Location location = user.getPlayer().getLocation();
 
         // Get the instance of the arena.
-        final BedWarsArena arena = MineManiaBedWars.getInstance().getArena(location).orElse(null);
+        final BedWarsArena arena = MineManiaBedWarsPlugin.getInstance().getArena(location).orElse(null);
 
         // Check if they are not standing in an arena.
         if (arena == null) {
@@ -97,7 +97,7 @@ public class ArenaSetGeneratorCommand implements CondensedCommand {
         ));
         arena.save();
 
-        MineManiaBedWars.getInstance().getArenaConfiguration().reloadRegisteredArenas();
+        MineManiaBedWarsPlugin.getInstance().getArenaConfiguration().reloadRegisteredArenas();
 
         // Send a confirmation message.
         user.sendMessage("&a&l> &aThe schematic location of &f" + arena.getIdentifier() + " &ais now set to &f" + location);

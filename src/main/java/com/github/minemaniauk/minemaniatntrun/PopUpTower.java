@@ -41,7 +41,7 @@ public class PopUpTower {
     public PopUpTower(@NotNull Location location, @NotNull TeamPlayer player) {
         this.location = location;
         this.teamPlayer = player;
-        this.schematic = (List<List<Integer>>) MineManiaBedWars.getInstance().getPopUpTowerConfig().getList("build");
+        this.schematic = (List<List<Integer>>) MineManiaBedWarsPlugin.getInstance().getPopUpTowerConfig().getList("build");
     }
 
     public @NotNull Location getLocation() {
@@ -55,11 +55,11 @@ public class PopUpTower {
         if (!partLocation.getBlock().getType().equals(Material.AIR)) return this;
 
         // Check if it was in an arena.
-        final BedWarsArena arena = MineManiaBedWars.getInstance().getArena(location).orElse(null);
+        final BedWarsArena arena = MineManiaBedWarsPlugin.getInstance().getArena(location).orElse(null);
         if (arena == null) return this;
 
         // Check if the arena is in a session.
-        BedWarsSession session = MineManiaBedWars.getInstance().getSessionManager().getSession(arena.getIdentifier()).orElse(null);
+        BedWarsSession session = MineManiaBedWarsPlugin.getInstance().getSessionManager().getSession(arena.getIdentifier()).orElse(null);
         if (session == null) return this;
 
         final boolean canPlace = session.checkIfPlayerCanPlaceHere(partLocation);
@@ -79,7 +79,7 @@ public class PopUpTower {
         AtomicInteger step = new AtomicInteger(0);
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        scheduler.runTaskTimer(MineManiaBedWars.getPlugin(), task -> {
+        scheduler.runTaskTimer(MineManiaBedWarsPlugin.getInstance().getPlugin(), task -> {
 
             if (step.get() >= schematic.size()) {
                 task.cancel();

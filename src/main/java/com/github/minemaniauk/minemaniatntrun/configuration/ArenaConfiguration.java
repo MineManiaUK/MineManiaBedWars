@@ -19,9 +19,9 @@
 
 package com.github.minemaniauk.minemaniatntrun.configuration;
 
-import com.github.cozyplugins.cozylibrary.configuration.SingleTypeConfigurationDirectory;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsPlugin;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
+import com.github.squishylib.configuration.directory.SingleTypeConfigurationDirectory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,22 +36,9 @@ public class ArenaConfiguration extends SingleTypeConfigurationDirectory<BedWars
      * Used to create an arena configuration directory.
      */
     public ArenaConfiguration() {
-        super("arenas", MineManiaBedWars.class);
-    }
-
-    @Override
-    public @Nullable String getDefaultFileName() {
-        return "arenas.yml";
-    }
-
-    @Override
-    protected void onReload() {
-
-    }
-
-    @Override
-    public @NotNull BedWarsArena createEmpty(@NotNull String identifier) {
-        return new BedWarsArena(UUID.fromString(identifier));
+        super(MineManiaBedWarsPlugin.getInstance().getPlugin().getDataFolder(),
+                identifier -> new BedWarsArena(UUID.fromString(identifier)),
+                false);
     }
 
     /**
@@ -60,10 +47,10 @@ public class ArenaConfiguration extends SingleTypeConfigurationDirectory<BedWars
      * @return This instance.
      */
     public @NotNull ArenaConfiguration reloadRegisteredArenas() {
-        MineManiaBedWars.getAPI().getGameManager().unregisterLocalArenas();
+        MineManiaBedWarsPlugin.getAPI().getGameManager().unregisterLocalArenas();
 
-        for (BedWarsArena arena : this.getAllTypes()) {
-            MineManiaBedWars.getAPI().getGameManager().registerArena(arena);
+        for (BedWarsArena arena : this.getAll()) {
+            MineManiaBedWarsPlugin.getAPI().getGameManager().registerArena(arena);
         }
 
         return this;
@@ -75,7 +62,7 @@ public class ArenaConfiguration extends SingleTypeConfigurationDirectory<BedWars
      * @return This instance.
      */
     public @NotNull ArenaConfiguration resetGameIdentifiers() {
-        for (BedWarsArena arena : this.getAllTypes()) {
+        for (BedWarsArena arena : this.getAll()) {
             arena.setGameRoomIdentifier(null);
             arena.save();
         }

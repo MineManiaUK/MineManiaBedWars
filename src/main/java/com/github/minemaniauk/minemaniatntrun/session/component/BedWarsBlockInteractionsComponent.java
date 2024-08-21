@@ -19,7 +19,7 @@
 package com.github.minemaniauk.minemaniatntrun.session.component;
 
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
-import com.github.cozyplugins.cozylibrary.location.Region3D;
+import com.github.cozyplugins.cozylibrary.location.Region;
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.minemaniauk.api.game.session.SessionComponent;
@@ -150,7 +150,7 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
         if (teamLocation != null) {
 
             final Location center = teamLocation.getRegion().getCenter().clone();
-            final Region3D tooCloseRegion = new Region3D(center, center).expand(3);
+            final Region tooCloseRegion = new Region(center, center).expand(3);
 
             boolean blockTooClose = tooCloseRegion.contains(event.getBlock().getLocation());
 
@@ -163,7 +163,7 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
         }
 
         // Check if the block is being placed out of bounds.
-        final Region3D arenaRegion = this.getSession().getArena().getRegion().orElseThrow();
+        final Region arenaRegion = this.getSession().getArena().getRegion().orElseThrow();
 
         if (event.getBlock().getLocation().getBlockY() <= arenaRegion.getMinPoint().getBlockY()) {
             new PlayerUser(event.getPlayer()).sendMessage("&7&l> &7You cannot place a block here. It is outside the arena.");
@@ -215,7 +215,7 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
         if (teamLocation != null) {
 
             final Location center = teamLocation.getRegion().getCenter().clone();
-            final Region3D tooCloseRegion = new Region3D(center, center).expand(3);
+            final Region tooCloseRegion = new Region(center, center).expand(3);
 
             boolean blockTooClose = tooCloseRegion.contains(location);
 
@@ -225,7 +225,7 @@ public class BedWarsBlockInteractionsComponent extends TaskContainer implements 
         }
 
         // Check if the block is being placed out of bounds.
-        final Region3D arenaRegion = this.getSession().getArena().getRegion().orElseThrow();
+        final Region arenaRegion = this.getSession().getArena().getRegion().orElseThrow();
 
         if (location.getBlockY() <= arenaRegion.getMinPoint().getBlockY()) {
             return false;

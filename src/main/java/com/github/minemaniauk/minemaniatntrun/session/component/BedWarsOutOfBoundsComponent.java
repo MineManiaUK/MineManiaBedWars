@@ -18,7 +18,7 @@
 
 package com.github.minemaniauk.minemaniatntrun.session.component;
 
-import com.github.cozyplugins.cozylibrary.location.Region3D;
+import com.github.cozyplugins.cozylibrary.location.Region;
 import com.github.cozyplugins.cozylibrary.task.TaskContainer;
 import com.github.minemaniauk.api.game.session.SessionComponent;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
@@ -67,7 +67,7 @@ public class BedWarsOutOfBoundsComponent extends TaskContainer implements Sessio
                 throw  new RuntimeException("Spawn point doesnt exist for " + arena.getIdentifier());
             }
 
-            Region3D region = arena.getRegion().get();
+            Region region = arena.getRegion().get();
 
             for (Player player : this.getSession().getOnlinePlayers()) {
                 if (region.contains(player.getLocation())) continue;

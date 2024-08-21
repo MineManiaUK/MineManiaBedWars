@@ -52,7 +52,7 @@ public enum ArmorType {
                                 "&7- You can purchase better armour in the shop.",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
-                        .setNBT("bed_wars_armour", true)
+                        .setNBTString("bed_wars_armour", "true")
                         .create()
                 );
 
@@ -63,7 +63,7 @@ public enum ArmorType {
                                 "&7- You can purchase better armour in the shop.",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
-                        .setNBT("bed_wars_armour", true)
+                        .setNBTString("bed_wars_armour", "true")
                         .create()
                 );
             });
@@ -85,7 +85,7 @@ public enum ArmorType {
                                 "&7- You can purchase better armour in the shop.",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
-                        .setNBT("bed_wars_armour", true)
+                        .setNBTString("bed_wars_armour", "true")
                         .create()
                 );
 
@@ -97,7 +97,7 @@ public enum ArmorType {
                                 "&7- You can purchase better armour in the shop.",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
-                        .setNBT("bed_wars_armour", true)
+                        .setNBTString("bed_wars_armour", "true")
                         .create()
                 );
             });
@@ -118,7 +118,7 @@ public enum ArmorType {
                                 "&7",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
-                        .setNBT("bed_wars_armour", true)
+                        .setNBTString("bed_wars_armour", "true")
                         .create()
                 );
 
@@ -129,7 +129,7 @@ public enum ArmorType {
                                 "&7",
                                 "&7- You can enchant your teams armour by clicking",
                                 "&7  the upgrades villager")
-                        .setNBT("bed_wars_armour", true)
+                        .setNBTString("bed_wars_armour", "true")
                         .create()
                 );
             });
@@ -175,7 +175,7 @@ public enum ArmorType {
                             "&7- You can purchase better armour in the shop.",
                             "&7- You can enchant your teams armour by clicking",
                             "&7  the upgrades villager")
-                    .setNBT("bed_wars_armour", true)
+                    .setNBTString("bed_wars_armour", "true")
                     .create()
             );
             player.getInventory().setChestplate(this.setColor(new CozyItem().setMaterial(Material.LEATHER_CHESTPLATE), color)
@@ -185,7 +185,7 @@ public enum ArmorType {
                             "&7- You can purchase better armour in the shop.",
                             "&7- You can enchant your teams armour by clicking",
                             "&7  the upgrades villager")
-                    .setNBT("bed_wars_armour", true)
+                    .setNBTString("bed_wars_armour", "true")
                     .create()
             );
         });

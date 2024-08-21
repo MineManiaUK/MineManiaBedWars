@@ -27,14 +27,12 @@ import com.github.cozyplugins.cozylibrary.user.ConsoleUser;
 import com.github.cozyplugins.cozylibrary.user.FakeUser;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.cozyplugins.cozylibrary.user.User;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsPlugin;
 import com.github.minemaniauk.minemaniatntrun.WorldEditUtility;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class ArenaSetSchematicCommand implements CondensedCommand {
 
@@ -67,7 +65,7 @@ public class ArenaSetSchematicCommand implements CondensedCommand {
         final Location location = user.getPlayer().getLocation();
 
         // Get the instance of the arena.
-        final BedWarsArena arena = MineManiaBedWars.getInstance().getArena(location).orElse(null);
+        final BedWarsArena arena = MineManiaBedWarsPlugin.getInstance().getArena(location).orElse(null);
 
         // Check if they are not standing in an arena.
         if (arena == null) {
@@ -88,7 +86,7 @@ public class ArenaSetSchematicCommand implements CondensedCommand {
         arena.setSchematic(arguments.getArguments().get(0));
         arena.save();
 
-        MineManiaBedWars.getInstance().getArenaConfiguration().reloadRegisteredArenas();
+        MineManiaBedWarsPlugin.getInstance().getArenaConfiguration().reloadRegisteredArenas();
 
         // Send a confirmation message.
         user.sendMessage("&a&l> &aThe schematic of &f" + arena.getIdentifier() + " &ais now set to &f" + arena.getSchematic());

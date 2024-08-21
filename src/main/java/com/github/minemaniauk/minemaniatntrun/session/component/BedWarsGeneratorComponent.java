@@ -18,7 +18,7 @@
 
 package com.github.minemaniauk.minemaniatntrun.session.component;
 
-import com.github.cozyplugins.cozylibrary.location.Region3D;
+import com.github.cozyplugins.cozylibrary.location.Region;
 import com.github.minemaniauk.api.game.session.Session;
 import com.github.minemaniauk.api.game.session.SessionComponent;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
@@ -84,7 +84,7 @@ public class BedWarsGeneratorComponent implements SessionComponent<BedWarsArena>
 
     public @NotNull BedWarsGeneratorComponent removeDrops() {
         final World world = this.getSession().getArena().getSchematicLocation().orElseThrow().getWorld();
-        final Region3D region = this.getSession().getArena().getRegion().orElseThrow();
+        final Region region = this.getSession().getArena().getRegion().orElseThrow();
 
         if (world == null) {
             throw new RuntimeException("World is null while trying to remove resources.");

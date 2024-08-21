@@ -23,15 +23,14 @@ import com.github.cozyplugins.cozylibrary.command.datatype.CommandArguments;
 import com.github.cozyplugins.cozylibrary.command.datatype.CommandCredentials;
 import com.github.cozyplugins.cozylibrary.command.datatype.CommandStatus;
 import com.github.cozyplugins.cozylibrary.command.datatype.CommandSuggestions;
-import com.github.cozyplugins.cozylibrary.location.Region3D;
+import com.github.cozyplugins.cozylibrary.location.Region;
 import com.github.cozyplugins.cozylibrary.user.ConsoleUser;
 import com.github.cozyplugins.cozylibrary.user.FakeUser;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.cozyplugins.cozylibrary.user.User;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsPlugin;
 import com.github.minemaniauk.minemaniatntrun.WorldEditUtility;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
-import com.sk89q.worldedit.regions.Region;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
@@ -72,7 +71,7 @@ public class ArenaCreateCommand implements CondensedCommand {
     public @Nullable CommandStatus onPlayerUser(@NotNull PlayerUser user, @NotNull CommandArguments arguments, @NotNull CommandStatus status) {
 
         // Check that the player has made a world edit selection.
-        Region region = WorldEditUtility.getSelection(user);
+        com.sk89q.worldedit.regions.Region region = WorldEditUtility.getSelection(user);
 
         // Check if a region has been selected.
         if (region == null) {
@@ -91,7 +90,7 @@ public class ArenaCreateCommand implements CondensedCommand {
         final int maxPlayers = Integer.parseInt(arguments.getArguments().get(1));
 
         // Create a cozy region.
-        Region3D region3D = new Region3D(
+        Region region3D = new Region(
                 new Location(Bukkit.getWorld(region.getWorld().getName()),
                         region.getMaximumPoint().getBlockX(),
                         region.getMaximumPoint().getBlockY(),
@@ -105,7 +104,7 @@ public class ArenaCreateCommand implements CondensedCommand {
         );
 
         // Create the arena.
-        BedWarsArena arena = MineManiaBedWars.getInstance().createArena(UUID.randomUUID(), region3D, minPlayers, maxPlayers);
+        BedWarsArena arena = MineManiaBedWarsPlugin.getInstance().createArena(UUID.randomUUID(), region3D, minPlayers, maxPlayers);
         user.sendMessage("&a&l> &aArena has been created with id &f" + arena.getIdentifier() + " &a with region &f" + arena.getRegion());
         WorldEditUtility.clearSelection(user);
         return new CommandStatus();

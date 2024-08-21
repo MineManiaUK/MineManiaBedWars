@@ -21,31 +21,24 @@ package com.github.minemaniauk.minemaniatntrun.arena;
 import com.github.cozyplugins.cozylibrary.indicator.LocationConvertable;
 import com.github.cozyplugins.cozylibrary.indicator.Savable;
 import com.github.cozyplugins.cozylibrary.item.CozyItem;
-import com.github.cozyplugins.cozylibrary.location.Region3D;
-import com.github.kerbity.kerb.result.CompletableResultSet;
-import com.github.kerbity.kerb.result.ResultSet;
+import com.github.cozyplugins.cozylibrary.location.Region;
 import com.github.minemaniauk.api.MineManiaLocation;
 import com.github.minemaniauk.api.game.Arena;
 import com.github.minemaniauk.api.game.GameType;
 import com.github.minemaniauk.api.user.MineManiaUser;
 import com.github.minemaniauk.bukkitapi.BukkitLocationConverter;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsPlugin;
 import com.github.minemaniauk.minemaniatntrun.WorldEditUtility;
 import com.github.minemaniauk.minemaniatntrun.generator.GeneratorLocation;
 import com.github.minemaniauk.minemaniatntrun.session.BedWarsSession;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
-import com.github.smuddgge.squishyconfiguration.indicator.ConfigurationConvertable;
-import com.github.smuddgge.squishyconfiguration.interfaces.ConfigurationSection;
-import com.github.smuddgge.squishyconfiguration.memory.MemoryConfigurationSection;
-import com.google.common.collect.Iterables;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
+import com.github.squishylib.configuration.ConfigurationSection;
+import com.github.squishylib.configuration.implementation.MemoryConfigurationSection;
+import com.github.squishylib.configuration.indicator.ConfigurationConvertible;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,10 +47,10 @@ import java.util.*;
 /**
  * Represents a bed wars arena.
  */
-public class BedWarsArena extends Arena implements ConfigurationConvertable<BedWarsArena>, Savable, LocationConvertable {
+public class BedWarsArena extends Arena implements ConfigurationConvertible<BedWarsArena>, Savable, LocationConvertable {
 
     private final @NotNull List<@NotNull TeamLocation> teamLocationList;
-    private @Nullable Region3D region;
+    private @Nullable Region region;
     private @Nullable Location spawnPoint;
     private @Nullable Location schematicLocation;
     private @Nullable String schematic;
@@ -69,7 +62,7 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
      * @param identifier The arena's identifier.
      */
     public BedWarsArena(@NotNull UUID identifier) {
-        super(identifier, MineManiaBedWars.getAPI().getServerName(), GameType.BED_WARS);
+        super(identifier, MineManiaBedWarsPlugin.getAPI().getServerName(), GameType.BED_WARS);
 
         this.teamLocationList = new ArrayList<>();
         this.generatorLocationList = new ArrayList<>();
@@ -82,17 +75,17 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
 
             // Check if the game room identifier has been provided.
             if (this.getGameRoom().isEmpty()) {
-                MineManiaBedWars.getInstance().getLogger().warning("Couldn't not find game room identifier {" + this.getGameRoomIdentifier() + "} for " + this.getIdentifier());
+                MineManiaBedWarsPlugin.getInstance().getPlugin().getLogger().warning("Couldn't not find game room identifier {" + this.getGameRoomIdentifier() + "} for " + this.getIdentifier());
                 return;
             }
 
-            MineManiaBedWars.getInstance()
+            MineManiaBedWarsPlugin.getInstance()
                     .getSessionManager()
                     .registerSession(new BedWarsSession(this.getIdentifier()));
 
             // Check if the schematic has been provided.
             if (this.schematic == null) {
-                MineManiaBedWars.getInstance().getLogger().warning("Couldn't not find schematic {" + this.schematic + "} for " + this.getIdentifier());
+                MineManiaBedWarsPlugin.getInstance().getPlugin().getLogger().warning("Couldn't not find schematic {" + this.schematic + "} for " + this.getIdentifier());
                 return;
             }
 
@@ -131,11 +124,11 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
     public void deactivate() {
         this.setGameRoomIdentifier(null);
         this.save();
-        MineManiaBedWars.getInstance().getSessionManager()
+        MineManiaBedWarsPlugin.getInstance().getSessionManager()
                 .getSession(this.getIdentifier())
                 .ifPresent(session -> {
                     session.stopComponents();
-                    MineManiaBedWars.getInstance().getSessionManager().unregisterSession(session);
+                    MineManiaBedWarsPlugin.getInstance().getSessionManager().unregisterSession(session);
                 });
     }
 
@@ -177,7 +170,7 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
         return Optional.empty();
     }
 
-    public @NotNull Optional<Region3D> getRegion() {
+    public @NotNull Optional<Region> getRegion() {
         return Optional.ofNullable(this.region);
     }
 
@@ -209,7 +202,7 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
         return this;
     }
 
-    public @NotNull BedWarsArena setRegion(@NotNull Region3D region) {
+    public @NotNull BedWarsArena setRegion(@NotNull Region region) {
         this.region = region;
         return this;
     }
@@ -253,7 +246,7 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
 
     @Override
     public @NotNull ConfigurationSection convert() {
-        ConfigurationSection section = new MemoryConfigurationSection(new LinkedHashMap<>());
+        ConfigurationSection section = new MemoryConfigurationSection();
 
         section.set("server_name", this.getServerName());
         section.set("game_type", this.getGameType().name());
@@ -300,7 +293,7 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
             ));
         }
 
-        if (section.getKeys().contains("region")) this.region = new Region3D(section.getSection("region"));
+        if (section.getKeys().contains("region")) this.region = new Region(section.getSection("region"));
         if (section.getKeys().contains("spawn_point"))
             this.spawnPoint = this.convertLocation(section.getSection("spawn_point"));
         if (section.getKeys().contains("schematic_location"))
@@ -326,7 +319,7 @@ public class BedWarsArena extends Arena implements ConfigurationConvertable<BedW
         super.save();
 
         // Save to local storage.
-        MineManiaBedWars.getInstance().getArenaConfiguration()
-                .insertType(this.getIdentifier().toString(), this);
+        MineManiaBedWarsPlugin.getInstance().getArenaConfiguration()
+                .set(this.getIdentifier().toString(), this);
     }
 }

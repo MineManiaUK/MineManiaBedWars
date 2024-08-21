@@ -19,10 +19,10 @@
 package com.github.minemaniauk.minemaniatntrun.team;
 
 import com.github.cozyplugins.cozylibrary.indicator.LocationConvertable;
-import com.github.cozyplugins.cozylibrary.location.Region3D;
-import com.github.smuddgge.squishyconfiguration.indicator.ConfigurationConvertable;
-import com.github.smuddgge.squishyconfiguration.interfaces.ConfigurationSection;
-import com.github.smuddgge.squishyconfiguration.memory.MemoryConfigurationSection;
+import com.github.cozyplugins.cozylibrary.location.Region;
+import com.github.squishylib.configuration.ConfigurationSection;
+import com.github.squishylib.configuration.implementation.MemoryConfigurationSection;
+import com.github.squishylib.configuration.indicator.ConfigurationConvertible;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,12 +33,12 @@ import java.util.LinkedHashMap;
  * Contains the static infomation about a
  * team platform in a bedwars arena.
  */
-public class TeamLocation implements ConfigurationConvertable<TeamLocation>, LocationConvertable {
+public class TeamLocation implements ConfigurationConvertible<TeamLocation>, LocationConvertable {
 
     private final @NotNull TeamColor color;
     private @NotNull Location spawnPoint;
     private @NotNull Integer radiusFromSpawnPoint;
-    private @Nullable Region3D generatorRegion;
+    private @Nullable Region generatorRegion;
     private @Nullable Location shopLocation;
     private @Nullable Location upgradesLocation;
 
@@ -96,8 +96,8 @@ public class TeamLocation implements ConfigurationConvertable<TeamLocation>, Loc
      *
      * @return A new instance of the team's region.
      */
-    public @NotNull Region3D getRegion() {
-        return new Region3D(this.spawnPoint, this.spawnPoint)
+    public @NotNull Region getRegion() {
+        return new Region(this.spawnPoint, this.spawnPoint)
                 .expand(this.radiusFromSpawnPoint);
     }
 
@@ -107,7 +107,7 @@ public class TeamLocation implements ConfigurationConvertable<TeamLocation>, Loc
      *
      * @return The instance of the generator region.
      */
-    public @Nullable Region3D getGeneratorRegion() {
+    public @Nullable Region getGeneratorRegion() {
         return this.generatorRegion;
     }
 
@@ -148,7 +148,7 @@ public class TeamLocation implements ConfigurationConvertable<TeamLocation>, Loc
         return this;
     }
 
-    public @NotNull TeamLocation setGeneratorRegion(@NotNull Region3D region) {
+    public @NotNull TeamLocation setGeneratorRegion(@NotNull Region region) {
         this.generatorRegion = region;
         return this;
     }
@@ -165,7 +165,7 @@ public class TeamLocation implements ConfigurationConvertable<TeamLocation>, Loc
 
     @Override
     public @NotNull ConfigurationSection convert() {
-        ConfigurationSection section = new MemoryConfigurationSection(new LinkedHashMap<>());
+        ConfigurationSection section = new MemoryConfigurationSection();
 
         section.set("spawn_point", this.convertLocation(this.spawnPoint));
         section.set("radius", this.radiusFromSpawnPoint);
@@ -189,7 +189,7 @@ public class TeamLocation implements ConfigurationConvertable<TeamLocation>, Loc
         this.radiusFromSpawnPoint = section.getInteger("radius");
 
         if (section.getKeys().contains("generator_region")) {
-            this.generatorRegion = new Region3D(section.getSection("generator_region"));
+            this.generatorRegion = new Region(section.getSection("generator_region"));
         }
 
         if (section.getKeys().contains("shop_location")) {

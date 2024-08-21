@@ -220,7 +220,7 @@ public enum BedWarsItem {
             .setLore("&7- This item will disappear when you die.",
                     "&7- Can be placed anywhere within the arena.",
                     "&7- When placed it will spawn a tower made of wool.")
-            .setNBT("pop_up_tower", true),
+            .setNBTString("pop_up_tower", "true"),
             Material.IRON_INGOT,
             24
     ),
@@ -276,7 +276,7 @@ public enum BedWarsItem {
                     true
             )
             .setPotionColor(Color.WHITE)
-            .setNBT("bedwars_invisibility", true),
+            .setNBTString("bedwars_invisibility", "true"),
             Material.EMERALD,
             2
     ),

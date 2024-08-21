@@ -16,25 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.github.minemaniauk.minemaniatntrun.arena;
+package com.github.minemaniauk.minemaniatntrun;
 
-import com.github.minemaniauk.api.game.session.Session;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsPlugin;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Optional;
-import java.util.UUID;
+public class MineManiaBedWarsLoaderPlugin extends JavaPlugin {
 
-/**
- * Represents the bed wars arena factory.
- * Used to get an instance of an arena from the configuration.
- */
-public class BedWarsArenaFactory implements Session.ArenaFactory<BedWarsArena> {
+    private MineManiaBedWarsPlugin plugin;
 
     @Override
-    public @NotNull Optional<BedWarsArena> getArena(@NotNull UUID uuid) {
-        return MineManiaBedWarsPlugin.getInstance()
-                .getArenaConfiguration()
-                .get(uuid.toString());
+    public void onEnable() {
+        this.plugin = new MineManiaBedWarsPlugin(this);
+        this.plugin.enable();
+    }
+
+    @Override
+    public void onDisable() {
+        this.plugin.disable();
     }
 }

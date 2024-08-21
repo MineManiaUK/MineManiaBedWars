@@ -23,13 +23,11 @@ import com.github.cozyplugins.cozylibrary.command.datatype.CommandArguments;
 import com.github.cozyplugins.cozylibrary.command.datatype.CommandCredentials;
 import com.github.cozyplugins.cozylibrary.command.datatype.CommandStatus;
 import com.github.cozyplugins.cozylibrary.command.datatype.CommandSuggestions;
-import com.github.cozyplugins.cozylibrary.location.Region3D;
 import com.github.cozyplugins.cozylibrary.user.ConsoleUser;
 import com.github.cozyplugins.cozylibrary.user.FakeUser;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.cozyplugins.cozylibrary.user.User;
-import com.github.minemaniauk.api.game.Arena;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsPlugin;
 import com.github.minemaniauk.minemaniatntrun.WorldEditUtility;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
@@ -38,9 +36,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.UUID;
 
 public class TeamLocationSetGeneratorRegionCommand implements CondensedCommand {
 
@@ -78,7 +73,7 @@ public class TeamLocationSetGeneratorRegionCommand implements CondensedCommand {
         }
 
         // Create a cozy region.
-        Region3D region3D = new Region3D(
+        com.github.cozyplugins.cozylibrary.location.Region region3D = new com.github.cozyplugins.cozylibrary.location.Region(
                 new Location(Bukkit.getWorld(region.getWorld().getName()),
                         region.getMaximumPoint().getBlockX(),
                         region.getMaximumPoint().getBlockY(),
@@ -92,7 +87,7 @@ public class TeamLocationSetGeneratorRegionCommand implements CondensedCommand {
         );
 
         // Get the instance of the arena.
-        final BedWarsArena arena = MineManiaBedWars.getInstance().getArena(user.getPlayer().getLocation()).orElse(null);
+        final BedWarsArena arena = MineManiaBedWarsPlugin.getInstance().getArena(user.getPlayer().getLocation()).orElse(null);
 
         // Check if they are not standing in an arena.
         if (arena == null) {

@@ -27,7 +27,7 @@ import com.github.cozyplugins.cozylibrary.user.ConsoleUser;
 import com.github.cozyplugins.cozylibrary.user.FakeUser;
 import com.github.cozyplugins.cozylibrary.user.PlayerUser;
 import com.github.cozyplugins.cozylibrary.user.User;
-import com.github.minemaniauk.minemaniatntrun.MineManiaBedWars;
+import com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsPlugin;
 import com.github.minemaniauk.minemaniatntrun.arena.BedWarsArena;
 import com.github.minemaniauk.minemaniatntrun.team.TeamColor;
 import com.github.minemaniauk.minemaniatntrun.team.TeamLocation;
@@ -77,7 +77,7 @@ public class TeamLocationCreateCommand implements CondensedCommand {
             final TeamColor teamColor = TeamColor.valueOf(arguments.getArguments().get(0).toUpperCase());
             final int radiusFromSpawnPoint = Integer.parseInt(arguments.getArguments().get(1));
 
-            BedWarsArena arena = MineManiaBedWars.getInstance()
+            BedWarsArena arena = MineManiaBedWarsPlugin.getInstance()
                     .getArena(user.getPlayer().getLocation())
                     .orElse(null);
 

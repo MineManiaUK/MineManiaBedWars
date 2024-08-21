@@ -19,9 +19,9 @@
 package com.github.minemaniauk.minemaniatntrun.generator;
 
 import com.github.cozyplugins.cozylibrary.indicator.LocationConvertable;
-import com.github.smuddgge.squishyconfiguration.indicator.ConfigurationConvertable;
-import com.github.smuddgge.squishyconfiguration.interfaces.ConfigurationSection;
-import com.github.smuddgge.squishyconfiguration.memory.MemoryConfigurationSection;
+import com.github.squishylib.configuration.ConfigurationSection;
+import com.github.squishylib.configuration.implementation.MemoryConfigurationSection;
+import com.github.squishylib.configuration.indicator.ConfigurationConvertible;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +35,7 @@ import java.util.UUID;
  * saved in the arena configuration with the
  * corresponding area.
  */
-public class GeneratorLocation implements ConfigurationConvertable<GeneratorLocation>, LocationConvertable {
+public class GeneratorLocation implements ConfigurationConvertible<GeneratorLocation>, LocationConvertable {
 
     private final @NotNull UUID identifier;
     private final @NotNull Location location;
@@ -98,7 +98,7 @@ public class GeneratorLocation implements ConfigurationConvertable<GeneratorLoca
 
     @Override
     public @NotNull ConfigurationSection convert() {
-        ConfigurationSection section = new MemoryConfigurationSection(new LinkedHashMap<>());
+        ConfigurationSection section = new MemoryConfigurationSection();
 
         section.set("location", this.convertLocation(this.location));
         section.set("type", this.type.name().toUpperCase());
