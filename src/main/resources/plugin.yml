@@ -1,5 +1,5 @@
 name: MineManiaBedWars
 version: '${project.version}'
-main: com.github.minemaniauk.minemaniatntrun.MineManiaBedWars
+main: com.github.minemaniauk.minemaniatntrun.MineManiaBedWarsLoaderPlugin
 api-version: '1.20'
 depend: [ MineManiaAPI-Bukkit ]

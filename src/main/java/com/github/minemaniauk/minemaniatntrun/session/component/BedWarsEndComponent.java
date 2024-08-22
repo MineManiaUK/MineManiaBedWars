@@ -35,6 +35,8 @@ public class BedWarsEndComponent extends TaskContainer implements SessionCompone
     private final BedWarsSession session;
     private long startTimeStamp;
 
+    private boolean forceStop = false;
+
     public BedWarsEndComponent(@NotNull BedWarsSession session) {
         this.session = session;
     }
@@ -52,10 +54,17 @@ public class BedWarsEndComponent extends TaskContainer implements SessionCompone
 
         this.runTaskLoop(END_IDENTIFIER, () -> {
 
+            if (this.forceStop) {
+                this.stop();
+                return;
+            }
+
             // Check if it's time to end the game.
             if (startTimeStamp + toWait.toMillis() < System.currentTimeMillis()) {
                 this.stop();
+                System.out.println("Game ended.");
                 this.getSession().endGameFully();
+                this.forceStop = true;
             }
 
         }, 20);

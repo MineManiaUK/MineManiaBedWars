@@ -25,6 +25,7 @@ import com.github.squishylib.configuration.directory.SingleTypeConfigurationDire
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.UUID;
 
 /**
@@ -36,7 +37,7 @@ public class ArenaConfiguration extends SingleTypeConfigurationDirectory<BedWars
      * Used to create an arena configuration directory.
      */
     public ArenaConfiguration() {
-        super(MineManiaBedWarsPlugin.getInstance().getPlugin().getDataFolder(),
+        super(new File(MineManiaBedWarsPlugin.getInstance().getPlugin().getDataFolder(), "arenas"),
                 identifier -> new BedWarsArena(UUID.fromString(identifier)),
                 false);
     }

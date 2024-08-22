@@ -171,6 +171,7 @@ public class BedWarsSession extends Session<BedWarsArena> {
         this.ensureTeams();
 
         if (this.getTeamList().size() <= 1) {
+            System.out.println("Not enough players, ending game.");
             this.endGameFully();
             return;
         }
@@ -232,6 +233,8 @@ public class BedWarsSession extends Session<BedWarsArena> {
 
     public void endGameFully() {
         MineManiaLocation location = new MineManiaLocation("hub", "null", 0, 0, 0);
+
+        System.out.println("Ending Game Fully.");
 
         // Teleport the players.
         for (Player player : this.getOnlinePlayers()) {

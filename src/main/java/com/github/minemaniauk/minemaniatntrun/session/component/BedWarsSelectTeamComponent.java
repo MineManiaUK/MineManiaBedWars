@@ -38,6 +38,8 @@ public class BedWarsSelectTeamComponent extends TaskContainer implements Session
     private final @NotNull BedWarsSession session;
     private long startTimeStamp;
 
+    private boolean forceStop = false;
+
     /**
      * Used to create a new session component.
      *
@@ -61,6 +63,11 @@ public class BedWarsSelectTeamComponent extends TaskContainer implements Session
 
         this.runTaskLoop(SELECT_TEAMS_IDENTIFIER, () -> {
 
+            if (this.forceStop) {
+                this.stop();
+                return;
+            }
+
             for (Player player : this.getSession().getOnlinePlayers()) {
                 if (player.getOpenInventory().getTopInventory().getType().equals(InventoryType.CHEST)) continue;
                 if (this.getSession().getTeam(player.getUniqueId()).isPresent()) continue;
@@ -70,8 +77,9 @@ public class BedWarsSelectTeamComponent extends TaskContainer implements Session
             }
 
             if (getCountDown().toSeconds() < 0) {
-                this.getSession().onStartGame();
                 this.stop();
+                this.getSession().onStartGame();
+                this.forceStop = true;
             }
 
         }, 20);
